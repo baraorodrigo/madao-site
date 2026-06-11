@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planejador Tributário Imobiliário — Madao Contabilidade</title>
+<meta name="description" content="Compare a tributação de venda de imóveis e aluguéis como pessoa física vs pessoa jurídica (holding), simule sucessão e analise sua carteira de imóveis.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ============================================================
+   TEMA — identidade visual Madao Contabilidade
+   azul #3848DD · amarelo #1f53eb · navy rgb(11,28,77) · Montserrat
+   ============================================================ */
+:root{
+  --blue:#1f53eb; --blue-dark:#1640c9; --blue-soft:#eef0fd;
+  --navy:#0b1c4d; --yellow:#1f53eb;          /* azul do logo (ex-amarelo) */ --yellow-soft:#eef2ff;
+  --ok:#16a05f; --ok-soft:#e6f7ef; --danger:#e8423a; --danger-soft:#fdecec;
+  --warn:#f59e0b; --warn-soft:#fff4e0;
+  --bg:#f4f6fb; --card:#ffffff; --text:#16213e; --text-soft:#5d6b8a; --border:#e4e8f3;
+  --radius:16px; --shadow:0 2px 14px rgba(11,28,77,.08);
+  --font:'Archivo','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --display:'Sora','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;padding-bottom:80px}
+.wrap{max-width:1060px;margin:0 auto;padding:16px}
+
+/* header + abas */
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 90%);color:#fff;padding:28px 16px 18px;text-align:center}
+header .brand{display:inline-flex;align-items:center;gap:8px;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;background:rgba(255,255,255,.12);padding:6px 14px;border-radius:99px;margin-bottom:12px}
+header .brand img{width:20px;height:20px;border-radius:50%;object-fit:cover;display:inline-block}
+header h1,.kpi .num,.kpi b,.slider-top .cur,.gauge-center b,.opp .big,.big,.bignum,.smini .v,.numeros b{font-family:var(--display)}
+header h1{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+header h1 em{font-style:normal;color:var(--yellow)}
+header p{opacity:.92;font-size:.9rem;max-width:620px;margin:8px auto 0}
+.tabbar{position:sticky;top:0;z-index:30;background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 90%);border-bottom:5px solid var(--yellow);padding-top:6px}
+.tabs{display:flex;gap:4px;max-width:1060px;margin:0 auto;padding:0 8px}
+.tabs button{flex:1;min-width:0;border:none;background:rgba(255,255,255,.12);color:#fff;font-family:inherit;font-weight:700;font-size:clamp(.66rem,2.4vw,.8rem);padding:11px 4px;border-radius:12px 12px 0 0;cursor:pointer;white-space:nowrap}
+.tabs button.on{background:var(--bg);color:var(--navy)}
+.tabs button .n{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--yellow);color:#fff;font-size:.66rem;margin-right:4px}
+
+/* cards / campos / linhas — família Madao */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-top:16px}
+.card h2{font-size:.82rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);font-weight:700}
+.card h2::before{content:'';width:14px;height:3px;border-radius:2px;background:var(--yellow);flex:none}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(min-width:680px){.fields{grid-template-columns:repeat(3,1fr)}.fields.f4{grid-template-columns:repeat(4,1fr)}}
+.field label{display:flex;align-items:center;gap:5px;font-size:.76rem;font-weight:700;margin-bottom:6px;color:var(--text-soft);flex-wrap:wrap}
+.field input,.field select{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:11px;font-size:1rem;font-family:inherit;background:#fff;color:var(--text);font-weight:600}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.field .hint{font-size:.7rem;color:var(--text-soft);margin-top:4px;font-weight:400}
+.field.main input{border-color:var(--blue);font-weight:800;font-size:1.15rem;color:var(--navy)}
+.toggle-row{display:flex;align-items:flex-start;gap:9px;padding:8px 0}
+.toggle-row input{width:18px;height:18px;accent-color:var(--blue);flex:none;margin-top:2px}
+.toggle-row label{margin:0;font-size:.82rem;font-weight:600;color:var(--text-soft);display:inline;line-height:1.45}
+details.adv{margin-top:14px;border:1px solid var(--border);border-radius:12px;background:#fafbfe}
+details.adv summary{cursor:pointer;padding:12px 16px;font-weight:700;font-size:.82rem;color:var(--text-soft);list-style:none;display:flex;align-items:center;gap:7px}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary::before{content:'▸';transition:transform .15s;color:var(--blue)}
+details.adv[open] summary::before{transform:rotate(90deg)}
+details.adv .fields{padding:4px 16px 14px}
+details.adv .field input{font-size:.9rem;padding:9px 10px}
+.line{display:flex;justify-content:space-between;font-size:.85rem;padding:5px 0;border-bottom:1px dashed var(--border);gap:10px}
+.line:last-of-type{border-bottom:none}
+.line .lbl{color:var(--text-soft);display:flex;align-items:center;gap:5px;text-align:left}
+.line.neg .val{color:var(--danger);font-weight:600}
+.line.pos .val{color:var(--ok);font-weight:600}
+.line.total{font-weight:800;font-size:.98rem;border-top:2px solid var(--border);margin-top:5px;padding-top:8px}
+.line.total .lbl{color:var(--text)}
+.line .val{white-space:nowrap}
+
+/* tooltips tap-friendly */
+.tip{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--text-soft);color:#fff;font-size:.66rem;font-weight:800;cursor:pointer;position:relative;border:none;vertical-align:middle;flex:none;font-family:inherit}
+.tip::before{content:'';position:absolute;inset:-13px}
+.tip::after{content:attr(data-tip);position:absolute;bottom:140%;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 12px;border-radius:9px;font-size:.75rem;font-weight:400;width:min(235px,80vw);text-align:left;opacity:0;pointer-events:none;transition:opacity .15s;z-index:60;line-height:1.45;text-transform:none;letter-spacing:0}
+.tip.edge-l::after{left:-8px;transform:none}
+.tip.edge-r::after{left:auto;right:-8px;transform:none}
+.tip.show::after,.tip:hover::after,.tip:focus-visible::after{opacity:1}
+
+/* veredito / alertas / comparativo */
+.verdict{margin-top:16px;border-radius:var(--radius);padding:15px 18px;display:flex;align-items:center;gap:13px;font-weight:600;font-size:.92rem;box-shadow:var(--shadow)}
+.verdict.win{background:var(--ok-soft);color:#0c5c38;border-left:6px solid var(--ok)}
+.verdict.lose{background:var(--danger-soft);color:#8c1f1a;border-left:6px solid var(--danger)}
+.verdict.neutral{background:var(--yellow-soft);color:#1c2f6e;border-left:6px solid var(--yellow)}
+.verdict .ico{font-size:1.4rem;flex:none}
+.alerta{margin-top:12px;border-radius:11px;padding:11px 14px;font-size:.8rem;font-weight:600;line-height:1.5}
+.alerta.red{background:var(--danger-soft);color:#8c1f1a;border-left:4px solid var(--danger)}
+.alerta.amber{background:var(--warn-soft);color:#7a4d00;border-left:4px solid var(--warn)}
+.duo{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
+@media(min-width:680px){.duo{grid-template-columns:1fr 1fr}}
+.col{border:1px solid var(--border);border-radius:12px;padding:16px}
+.col h3{font-size:.9rem;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-weight:800}
+.col h3 .tag{font-size:.64rem;padding:3px 10px;border-radius:99px;background:var(--bg);color:var(--text-soft);font-weight:700}
+.col.melhor{border:2px solid var(--ok);position:relative}
+.col.melhor::after{content:'✓ melhor opção';position:absolute;top:-11px;right:12px;background:var(--ok);color:#fff;font-size:.66rem;font-weight:800;padding:3px 10px;border-radius:99px}
+.bignum{font-size:clamp(1.4rem,4.5vw,1.9rem);font-weight:800;color:var(--navy);letter-spacing:-.02em}
+.chart-box{position:relative;height:250px;margin-top:6px}
+.chart-cap{font-size:.74rem;color:var(--text-soft);text-align:center;margin-top:10px;font-weight:500}
+.card.no-chart .chart-box{display:none}   /* a conclusão textual (.chart-cap) permanece visível */
+
+/* carteira */
+table.cart{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:10px}
+table.cart th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-soft);padding:8px 6px;border-bottom:2px solid var(--border)}
+table.cart td{padding:9px 6px;border-bottom:1px dashed var(--border);vertical-align:top}
+table.cart .badge{display:inline-block;padding:3px 9px;border-radius:99px;font-size:.66rem;font-weight:800;white-space:nowrap}
+.badge.pf{background:var(--ok-soft);color:var(--ok)}
+.badge.pj{background:var(--blue-soft);color:var(--blue-dark)}
+.badge.isen{background:var(--yellow-soft);color:#1c2f6e}
+table.cart button{border:none;background:none;cursor:pointer;font-size:.9rem;padding:2px 4px}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+@media(min-width:780px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--bg);border-radius:12px;padding:14px;text-align:center}
+.kpi b{display:block;font-size:clamp(1rem,3vw,1.3rem);color:var(--navy);font-weight:800}
+.kpi.eco b{color:var(--ok)}
+.kpi span{font-size:.68rem;color:var(--text-soft);font-weight:600}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btn,.btn2{border:none;border-radius:99px;padding:11px 18px;font-size:.84rem;font-weight:800;cursor:pointer;font-family:inherit}
+.btn{background:var(--blue);color:#fff}
+.btn:hover{background:var(--blue-dark)}
+.btn2{background:var(--yellow);color:#fff}
+.btn3{background:none;border:1.5px solid var(--border);color:var(--text-soft);border-radius:99px;padding:10px 16px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit}
+
+/* CTA flutuante + modal */
+#fab{position:fixed;right:16px;bottom:16px;z-index:40;background:#25d366;color:#fff;border:none;border-radius:99px;padding:14px 20px;font-size:.9rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(0,0,0,.25);display:flex;align-items:center;gap:8px}
+#fab:hover{filter:brightness(1.06)}
+#lead-modal{position:fixed;inset:0;background:rgba(11,28,77,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#lead-modal.open{display:flex}
+#lead-modal .box{background:#fff;border-radius:18px;padding:26px;max-width:410px;width:100%;position:relative;border-top:6px solid var(--yellow)}
+#lead-modal h3{margin-bottom:4px;color:var(--navy);font-weight:800}
+#lead-modal p{font-size:.85rem;color:var(--text-soft);margin-bottom:14px}
+#lead-modal .field{margin-bottom:12px}
+#lead-modal .close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-soft)}
+#lead-modal a.btn{display:block;width:100%;text-align:center;text-decoration:none;border-radius:11px;padding:14px}
+
+/* abas: seções */
+.tab-sec{display:none}
+.tab-sec.on{display:block}
+.placeholder{text-align:center;color:var(--text-soft);padding:36px 16px;font-size:.92rem}
+.placeholder b{color:var(--blue)}
+ul.lista{margin:8px 0 0 18px;font-size:.84rem}
+ul.lista li{margin-bottom:6px}
+
+/* relatório de impressão — só intercepta o print disparado pelo botão (classe no body) */
+#printArea{display:none}
+@media print{
+  body{padding:0;background:#fff}
+  #fab{display:none!important}
+  body.print-report > *:not(#printArea){display:none!important}
+  body.print-report #printArea{display:block}
+}
+footer{margin-top:24px;font-size:.72rem;color:var(--text-soft)}
+
+/* ---------- topbar com logo oficial (padrão do site) ---------- */
+.topbar{background:#fff;border-bottom:1px solid var(--border)}
+.topbar .in{max-width:1060px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.topbar img{height:36px;width:auto;display:block}
+.topbar a.tz{background:var(--blue);color:#fff;text-decoration:none;font-weight:700;font-size:.8rem;padding:10px 18px;border-radius:99px;white-space:nowrap}
+.topbar a.tz:hover{background:var(--blue-dark)}
+@media(max-width:480px){.topbar img{height:30px}.topbar a.tz{font-size:.72rem;padding:9px 14px}}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="in">
+  <a href="https://www.madaocontabilidade.com" aria-label="Madao Contabilidade"><img src="site-assets/logo-madao-oficial-t.png" alt="Madao Contabilidade"></a>
+  <a class="tz" href="https://wa.me/5548998129815">Falar no WhatsApp</a>
+</div></div>
+<header>
+  <h1>Planejador Tributário <em>Imobiliário</em></h1>
+  <p>Venda, aluguel, holding e sucessão: descubra em qual estrutura cada operação paga menos imposto — PF ou PJ.</p>
+</header>
+<div class="tabbar">
+  <nav class="tabs">
+    <button data-tab="venda" class="on"><span class="n">1</span>Venda</button>
+    <button data-tab="aluguel"><span class="n">2</span>Aluguéis</button>
+    <button data-tab="holding"><span class="n">3</span>Holding</button>
+    <button data-tab="carteira"><span class="n">4</span>Carteira</button>
+  </nav>
+</div>
+
+<div class="wrap">
+
+<!-- ================= MÓDULO 1 — VENDA ================= -->
+<section class="tab-sec on" id="tab-venda">
+  <div class="card">
+    <h2>Dados da venda</h2>
+    <div class="fields f4">
+      <div class="field main"><label for="vVenda">Valor de venda (R$)</label><input type="text" id="vVenda" inputmode="decimal" placeholder="ex.: 800.000"></div>
+      <div class="field"><label for="vAquis">Valor de aquisição (R$)</label><input type="text" id="vAquis" inputmode="decimal" placeholder="ex.: 400.000"></div>
+      <div class="field"><label for="vData">Data de aquisição
+        <button class="tip" data-tip="Essencial: quanto mais antigo o imóvel, maiores os fatores de redução do imposto na PF (Leis 7.713/88 e 11.196/05).">?</button>
+      </label><input type="month" id="vData" min="1960-01"></div>
+      <div class="field"><label for="vCustos">Benfeitorias + corretagem (R$)
+        <button class="tip" data-tip="Reformas comprovadas com nota fiscal e a corretagem paga por você somam ao custo de aquisição e reduzem o ganho tributável.">?</button>
+      </label><input type="text" id="vCustos" inputmode="decimal" placeholder="0"></div>
+    </div>
+    <div class="toggle-row"><input type="checkbox" id="vUnico"><label for="vUnico">É o único imóvel que possuo, a venda é de até R$ 440.000 e não vendi outro nos últimos 5 anos <b>(isenção total)</b></label></div>
+    <div class="toggle-row"><input type="checkbox" id="vReinv"><label for="vReinv">Imóvel residencial e vou comprar outro residencial em até 180 dias (isenção proporcional — utilizável 1x a cada 5 anos)</label></div>
+    <div class="fields" id="vReinvWrap" style="display:none;margin-top:6px">
+      <div class="field"><label for="vReinvVal">Valor que será reinvestido (R$)</label><input type="text" id="vReinvVal" inputmode="decimal" placeholder="ex.: 600.000"></div>
+    </div>
+    <div class="toggle-row" style="margin-top:6px">
+      <label style="font-weight:700">Na PJ, o imóvel ficaria:</label>
+      <label><input type="radio" name="vSit" value="estoque" checked> no <b>estoque</b> (atividade imobiliária)</label>
+      <label><input type="radio" name="vSit" value="imobilizado"> no <b>ativo imobilizado</b></label>
+    </div>
+    <details class="adv">
+      <summary>Custos de estruturação da PJ (editáveis)</summary>
+      <div class="fields f4">
+        <div class="field"><label>ITBI na integralização (%)
+          <button class="tip" data-tip="Imposto municipal ao colocar o imóvel no capital da empresa. PJ com atividade imobiliária preponderante NÃO tem imunidade (Tema 796/STF) — por isso o padrão é 3%.">?</button>
+        </label><input type="number" id="vItbi" value="3" step="0.5" min="0"></div>
+        <div class="field"><label>Base do ITBI (R$)</label><input type="text" id="vVenal" inputmode="decimal" placeholder="= valor de aquisição"><div class="hint">vazio = usa o valor de aquisição</div></div>
+        <div class="field"><label>Cartório / junta (R$)</label><input type="number" id="vCart" value="2500" step="100" min="0"></div>
+        <div class="field"><label>Contabilidade (R$/mês) × prazo</label><input type="number" id="vContab" value="400" step="50" min="0"><input type="number" id="vMeses" value="6" step="1" min="1" style="margin-top:6px"><div class="hint">meses até vender</div></div>
+      </div>
+    </details>
+  </div>
+  <div class="placeholder" id="vPlaceholder">↑ Preencha venda, aquisição e a data — o comparativo aparece aqui.</div>
+  <div id="vOut" style="display:none">
+    <div class="verdict" id="vVerdict"><span class="ico" id="vVIco"></span><span id="vVTxt"></span></div>
+    <div class="alerta red" id="vAlertaImob" style="display:none">⚠️ Imóvel no <b>ativo imobilizado</b>: a PJ paga <b>34% sobre o ganho</b> — quase sempre pior que a PF. Existe possibilidade de reclassificação/planejamento: fale com o contador.</div>
+    <div class="card"><h2>Comparativo lado a lado</h2>
+      <div class="duo">
+        <div class="col" id="vColPF"><h3>Pessoa Física <span class="tag">ganho de capital</span></h3>
+          <div class="line"><span class="lbl">Ganho bruto</span><span class="val" id="vGanhoBruto"></span></div>
+          <div class="line pos"><span class="lbl">Redução Lei 7.713/88
+            <button class="tip" data-tip="Imóveis comprados até 1988 têm desconto de 5% no ganho por ano de antiguidade — chega a 100% para aquisições até 1969.">?</button>
+          </span><span class="val" id="vRed7713"></span></div>
+          <div class="line pos"><span class="lbl">Fatores de redução 11.196/05
+            <button class="tip" data-tip="Redutores automáticos que diminuem o ganho tributável conforme os meses passados desde a aquisição (FR1 até nov/2005 e FR2 dali em diante). Quanto mais tempo, menos imposto.">?</button>
+          </span><span class="val" id="vFatores"></span></div>
+          <div class="line"><span class="lbl">Ganho tributável</span><span class="val" id="vGanhoTrib"></span></div>
+          <div class="line neg"><span class="lbl">IR ganho de capital (15–22,5%)</span><span class="val" id="vIrPF"></span></div>
+          <div class="line total"><span class="lbl">Líquido no bolso</span><span class="val" id="vLiqPF"></span></div>
+        </div>
+        <div class="col" id="vColPJ"><h3>Pessoa Jurídica <span class="tag" id="vTagPJ">lucro presumido</span></h3>
+          <div id="vPJlinhas"></div>
+          <div class="line neg"><span class="lbl">Custos de estrutura (ITBI, cartório, contab.)</span><span class="val" id="vEstrut"></span></div>
+          <div class="line total"><span class="lbl">Líquido no bolso</span><span class="val" id="vLiqPJ"></span></div>
+        </div>
+      </div>
+      <div class="alerta amber" id="vAlertaIsen" style="display:none"></div>
+    </div>
+    <div class="card"><h2>Breakeven: a partir de qual margem a PJ compensa?</h2>
+      <div class="chart-box"><canvas id="vChart"></canvas></div>
+      <div class="chart-cap" id="vChartCap"></div>
+    </div>
+    <div class="card"><h2>Calculadora reversa</h2>
+      <div class="fields"><div class="field"><label for="vAlvo">Quero líquido de (R$)</label><input type="text" id="vAlvo" inputmode="decimal" placeholder="ex.: 700.000"></div></div>
+      <div id="vReversa" style="margin-top:10px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MÓDULO 2 — ALUGUÉIS ================= -->
+<section class="tab-sec" id="tab-aluguel">
+  <div class="card">
+    <h2>Seus aluguéis</h2>
+    <div class="fields">
+      <div class="field main"><label for="aReceita">Receita mensal de aluguéis (R$)</label><input type="text" id="aReceita" inputmode="decimal" placeholder="ex.: 10.000"></div>
+      <div class="field"><label for="aDesp">Despesas dedutíveis PF (R$/mês)
+        <button class="tip" data-tip="Condomínio e IPTU pagos por você (proprietário) podem ser abatidos da base do carnê-leão.">?</button>
+      </label><input type="text" id="aDesp" inputmode="decimal" placeholder="0"></div>
+      <div class="field"><label for="aContab">Contabilidade da holding (R$/mês)</label><input type="number" id="aContab" value="400" step="50" min="0"></div>
+    </div>
+  </div>
+  <div class="placeholder" id="aPlaceholder">↑ Informe a receita mensal de aluguéis.</div>
+  <div id="aOut" style="display:none">
+    <div class="verdict" id="aVerdict"><span class="ico" id="aVIco"></span><span id="aVTxt"></span></div>
+    <div class="card"><h2>Comparativo mensal e anual</h2>
+      <div class="duo">
+        <div class="col" id="aColPF"><h3>Pessoa Física <span class="tag">carnê-leão
+          <button class="tip" data-tip="O 'carnê' mensal obrigatório de quem recebe aluguel como pessoa física: o IR é calculado pela mesma tabela progressiva do salário, chegando a 27,5%.">?</button></span></h3>
+          <div class="line"><span class="lbl">Base de cálculo</span><span class="val" id="aBasePF"></span></div>
+          <div class="line neg"><span class="lbl">IR mensal (tabela progressiva)</span><span class="val" id="aIrPF"></span></div>
+          <div class="line"><span class="lbl">Alíquota efetiva</span><span class="val" id="aEfPF"></span></div>
+          <div class="line total"><span class="lbl">Líquido /mês · /ano</span><span class="val" id="aLiqPF"></span></div>
+        </div>
+        <div class="col" id="aColPJ"><h3>Holding <span class="tag">presumido 32%
+          <button class="tip" data-tip="No lucro presumido, a lei 'presume' que 32% da receita de aluguel é lucro e tributa só essa parte — o que dá ~11,33% sobre o aluguel, fixo, independente do volume.">?</button></span></h3>
+          <div class="line neg"><span class="lbl">IRPJ + adicional</span><span class="val" id="aIrpj"></span></div>
+          <div class="line neg"><span class="lbl">CSLL</span><span class="val" id="aCsll"></span></div>
+          <div class="line neg"><span class="lbl">PIS + COFINS</span><span class="val" id="aPisCofins"></span></div>
+          <div class="line neg"><span class="lbl">Contabilidade</span><span class="val" id="aContabL"></span></div>
+          <div class="line"><span class="lbl">Alíquota efetiva (s/ contab.)</span><span class="val" id="aEfPJ"></span></div>
+          <div class="line total"><span class="lbl">Líquido /mês · /ano</span><span class="val" id="aLiqPJ"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card"><h2>Onde a holding começa a compensar</h2>
+      <div class="chart-box"><canvas id="aChart"></canvas></div>
+      <div class="chart-cap" id="aChartCap"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MÓDULO 3 — HOLDING & SUCESSÃO ================= -->
+<section class="tab-sec" id="tab-holding">
+  <div class="card">
+    <h2>Seu patrimônio e a sucessão</h2>
+    <div class="fields f4">
+      <div class="field main"><label for="hPatrimonio">Patrimônio imobiliário (R$)</label><input type="text" id="hPatrimonio" inputmode="decimal" placeholder="ex.: 3.000.000"><button class="btn3" id="hPuxar" style="margin-top:8px">usar minha carteira →</button></div>
+      <div class="field"><label for="hItcmd">ITCMD do estado (%)
+        <button class="tip" data-tip="Imposto estadual sobre herança e doação. Varia de 1% a 8% conforme o estado (SC: até 8% progressivo). Há discussões sobre a base de cálculo — confirme a alíquota do seu estado.">?</button>
+      </label><input type="number" id="hItcmd" value="8" step="0.5" min="0" max="8"></div>
+      <div class="field"><label for="hItcmdDoa">ITCMD na doação de quotas (%)</label><input type="number" id="hItcmdDoa" value="8" step="0.5" min="0" max="8"></div>
+      <div class="field"><label for="hHerdeiros">Nº de herdeiros</label><input type="number" id="hHerdeiros" value="2" step="1" min="1"></div>
+    </div>
+    <details class="adv">
+      <summary>Custos editáveis (honorários, custas, estrutura da holding)</summary>
+      <div class="fields f4">
+        <div class="field"><label>Honorários advocatícios do inventário (%)</label><input type="number" id="hHon" value="6" step="0.5" min="0"></div>
+        <div class="field"><label>Custas judiciais / cartório (%)</label><input type="number" id="hCustas" value="2" step="0.5" min="0"></div>
+        <div class="field"><label>ITBI na integralização (%)
+          <button class="tip" data-tip="Holding patrimonial SEM atividade imobiliária preponderante costuma ter imunidade de ITBI na integralização — por isso o padrão é 0%. Se houver atividade imobiliária, use 3%. Análise caso a caso.">?</button>
+        </label><input type="number" id="hItbi" value="0" step="0.5" min="0"></div>
+        <div class="field"><label>Constituição (R$) + contab. anual (R$)</label><input type="number" id="hConst" value="8000" step="500" min="0"><input type="number" id="hContabAno" value="4800" step="100" min="0" style="margin-top:6px"></div>
+      </div>
+    </details>
+  </div>
+  <div class="placeholder" id="hPlaceholder">↑ Informe o patrimônio para comparar inventário × holding.</div>
+  <div id="hOut" style="display:none">
+    <div class="verdict win" id="hVerdict"><span class="ico">✓</span><span id="hVTxt"></span></div>
+    <div class="card"><h2>Inventário × holding com doação de quotas</h2>
+      <div class="duo">
+        <div class="col"><h3>Sem planejamento <span class="tag">inventário</span></h3>
+          <div class="line neg"><span class="lbl">ITCMD sobre a herança</span><span class="val" id="hItcmdVal"></span></div>
+          <div class="line neg"><span class="lbl">Honorários advocatícios</span><span class="val" id="hHonVal"></span></div>
+          <div class="line neg"><span class="lbl">Custas judiciais / cartório</span><span class="val" id="hCustasVal"></span></div>
+          <div class="line total"><span class="lbl">Custo para os herdeiros</span><span class="val" id="hTotalInv"></span></div>
+          <div class="line"><span class="lbl">Tempo estimado</span><span class="val">1 a 5 anos, imóveis bloqueados</span></div>
+        </div>
+        <div class="col melhor"><h3>Com holding <span class="tag">doação de quotas + usufruto</span></h3>
+          <div class="line neg"><span class="lbl">ITCMD na doação das quotas
+            <button class="tip" data-tip="A doação das quotas em vida também paga ITCMD — mas resolve a sucessão de uma vez, sem inventário. Pode incidir sobre valor venal/patrimonial: confirme no seu estado.">?</button>
+          </span><span class="val" id="hDoaVal"></span></div>
+          <div class="line neg"><span class="lbl">ITBI integralização</span><span class="val" id="hItbiVal"></span></div>
+          <div class="line neg"><span class="lbl">Constituição + 1º ano de contabilidade</span><span class="val" id="hEstrVal"></span></div>
+          <div class="line total"><span class="lbl">Custo total do planejamento</span><span class="val" id="hTotalHold"></span></div>
+          <div class="line"><span class="lbl">Tempo</span><span class="val">resolvido em vida, sem bloqueio</span></div>
+        </div>
+      </div>
+      <div class="chart-box" style="height:140px"><canvas id="hChart"></canvas></div>
+    </div>
+    <div class="card"><h2>O que mais a holding traz</h2>
+      <div class="duo">
+        <div><b style="font-size:.85rem">Benefícios</b><ul class="lista">
+          <li>Proteção patrimonial: imóveis fora do CPF dos sócios</li>
+          <li>Evita conflito entre herdeiros — divisão definida em vida, com usufruto
+            <button class="tip" data-tip="Você doa as quotas mas mantém o usufruto: continua mandando na empresa e recebendo os aluguéis enquanto viver.">?</button></li>
+          <li>Aluguéis tributados a ~11,33% em vez de até 27,5% (módulo 2)</li>
+          <li>Sucessão sem inventário: sem anos de espera nem imóveis bloqueados</li>
+        </ul></div>
+        <div><b style="font-size:.85rem">Pontos de atenção</b><ul class="lista">
+          <li>Custo fixo anual de manutenção (contabilidade, declarações)</li>
+          <li>ITCMD incide na doação — alíquota e base variam por estado</li>
+          <li>Imunidade do ITBI exige análise da atividade preponderante</li>
+        </ul></div>
+      </div>
+      <div class="btnrow"><button class="btn2" id="hCta">Estruturar minha holding — agendar análise →</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MÓDULO 4 — CARTEIRA ================= -->
+<section class="tab-sec" id="tab-carteira">
+  <div class="card">
+    <h2>Cadastrar imóvel <span style="text-transform:none;letter-spacing:0;font-weight:600">(os dados ficam só neste navegador — somem se você limpar o histórico; use Exportar JSON como cópia)</span></h2>
+    <div class="fields f4">
+      <div class="field"><label for="cApelido">Apelido</label><input type="text" id="cApelido" placeholder="ex.: Apto Centro"></div>
+      <div class="field"><label for="cTipo">Tipo</label><select id="cTipo"><option value="residencial">Residencial</option><option value="comercial">Comercial</option><option value="terreno">Terreno</option></select></div>
+      <div class="field"><label for="cAquis">Aquisição (R$)</label><input type="text" id="cAquis" inputmode="decimal" placeholder="ex.: 300.000"></div>
+      <div class="field"><label for="cData">Data de aquisição</label><input type="month" id="cData" min="1960-01"></div>
+      <div class="field"><label for="cMercado">Valor de mercado (R$)</label><input type="text" id="cMercado" inputmode="decimal" placeholder="ex.: 500.000"></div>
+      <div class="field"><label for="cFinalidade">Finalidade</label><select id="cFinalidade"><option value="vender">Vender</option><option value="alugar">Alugar</option><option value="manter">Manter</option></select></div>
+      <div class="field" id="cAluguelWrap" style="display:none"><label for="cAluguel">Aluguel mensal (R$)</label><input type="text" id="cAluguel" inputmode="decimal" placeholder="ex.: 2.500"></div>
+    </div>
+    <div class="btnrow">
+      <button class="btn" id="cSalvar">+ Adicionar imóvel</button>
+      <button class="btn3" id="cCancelar" style="display:none">cancelar edição</button>
+    </div>
+  </div>
+  <div class="card" id="cListaCard" style="display:none">
+    <h2>Meus imóveis</h2>
+    <div style="overflow-x:auto"><table class="cart"><thead><tr><th>Imóvel</th><th>Aquisição</th><th>Mercado</th><th>Finalidade</th><th>Recomendação</th><th></th></tr></thead><tbody id="cTbody"></tbody></table></div>
+    <div class="kpis">
+      <div class="kpi"><b id="cPatrimonio"></b><span>patrimônio total (mercado)</span></div>
+      <div class="kpi"><b id="cGanho"></b><span>ganho potencial da carteira</span></div>
+      <div class="kpi"><b id="cImpostoPF"></b><span>impostos: tudo na PF</span></div>
+      <div class="kpi eco"><b id="cEconomia"></b><span>economia com estrutura otimizada</span></div>
+    </div>
+    <p class="chart-cap" id="cResumo" style="text-align:left"></p>
+    <div class="btnrow">
+      <button class="btn2" id="cRelatorio">Gerar relatório p/ cliente (PDF) →</button>
+      <button class="btn3" id="cExport">exportar JSON</button>
+      <button class="btn3" id="cImport">importar JSON</button>
+      <input type="file" id="cFile" accept=".json" style="display:none">
+    </div>
+    <div class="fields" style="margin-top:10px"><div class="field"><label for="cCliente">Nome do cliente (para o relatório)</label><input type="text" id="cCliente" placeholder="ex.: João da Silva"></div></div>
+  </div>
+  <div class="placeholder" id="cPlaceholder">Cadastre seus imóveis e veja a análise consolidada da carteira — melhor estrutura imóvel a imóvel.</div>
+</section>
+
+<footer>
+  <p><strong>Aviso:</strong> simulação com base na legislação vigente em jun/2026 (IR ganho de capital, Lei 11.196/2005, lucro presumido, ITCMD estadual). Os resultados são estimativas para fins de planejamento e NÃO constituem parecer tributário. Casos com imóvel rural, permuta, ganho acima de R$ 5 milhões, imóvel no ativo imobilizado ou holding exigem análise individualizada. Consulte um contador.</p>
+</footer>
+</div>
+
+<button id="fab">💬 Falar com contador</button>
+<div id="lead-modal" role="dialog" aria-modal="true">
+  <div class="box">
+    <button class="close" id="modalClose" aria-label="Fechar">×</button>
+    <h3>Fale com a Madao Contabilidade</h3>
+    <p id="modalLead">Um contador analisa sua simulação e desenha a estrutura ideal pro seu caso.</p>
+    <div class="field"><label for="leadNome">Seu nome</label><input type="text" id="leadNome" placeholder="Nome completo"></div>
+    <div class="field"><label for="leadZap">Seu WhatsApp</label><input type="tel" id="leadZap" placeholder="(48) 9 9999-9999"></div>
+    <a class="btn" id="leadGo" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+'use strict';
+/* ============================================================
+   CONFIGURAÇÃO — edite aqui
+   ============================================================ */
+const CONFIG = {
+  whatsapp: '5548998129815',           // WhatsApp da Madao (wa.me)
+  empresaNome: 'Madao Contabilidade',
+  logoRelatorio: 'MADAO CONTABILIDADE · Imbituba/SC · (48) 99812-9815',
+};
+
+/* ============================================================
+   PARÂMETROS LEGAIS — competência jun/2026 (todos editáveis)
+   ============================================================ */
+// IR sobre ganho de capital PF — progressivo por faixa (Lei 13.259/2016)
+const GCAP_FAIXAS = [
+  { ate: 5000000,  aliq: 0.15  },
+  { ate: 10000000, aliq: 0.175 },
+  { ate: 30000000, aliq: 0.20  },
+  { ate: Infinity, aliq: 0.225 },
+];
+// Fatores de redução Lei 11.196/2005, art. 40
+const FR1_TAXA = 1.0060;   // jan/1996 (ou aquisição) até nov/2005
+const FR2_TAXA = 1.0035;   // dez/2005 (ou aquisição) até a venda
+// PJ lucro presumido — venda de imóvel do ESTOQUE (atividade imobiliária)
+const PJV = { presIRPJ: 0.08, presCSLL: 0.12, irpj: 0.15, adicional: 0.10,
+              limiteAdicionalTri: 60000, csll: 0.09, pis: 0.0065, cofins: 0.03 };
+// PJ — imóvel no ATIVO IMOBILIZADO: ganho de capital tributado a 34%
+const PJ_IMOBILIZADO = 0.34;
+// PJ lucro presumido — LOCAÇÃO (presunção 32%)
+const PJA = { presuncao: 0.32, irpj: 0.15, adicional: 0.10, limiteAdicionalMes: 20000,
+              csll: 0.09, piscofins: 0.0365 };
+// Carnê-leão / IRRF mensal (tabela maio/2025 vigente)
+const IRRF_TABELA = [
+  { ate: 2428.80,  aliq: 0,     deduz: 0      },
+  { ate: 2826.65,  aliq: 0.075, deduz: 182.16 },
+  { ate: 3751.05,  aliq: 0.15,  deduz: 394.16 },
+  { ate: 4664.68,  aliq: 0.225, deduz: 675.49 },
+  { ate: Infinity, aliq: 0.275, deduz: 908.73 },
+];
+const ISENCAO_UNICO_LIMITE = 440000;   // único imóvel ≤ 440k (art. 23 Lei 9.250/95)
+
+/* ============================================================
+   MOTOR — MÓDULO 1: VENDA (PF ganho de capital × PJ presumido)
+   ============================================================ */
+const mesesEntre = (y1, m1, y2, m2) => (y2 - y1) * 12 + (m2 - m1);
+
+// Lei 7.713/88: redução de 5% por ano de aquisição anterior a 1989 (100% até 1969)
+function fator7713(anoAquis) {
+  if (anoAquis > 1988) return 1;
+  const pct = Math.min(100, 5 * (1989 - anoAquis));
+  return 1 - pct / 100;
+}
+
+// Fatores 11.196/05 — m1: jan/96 (ou aquisição) → nov/05; m2: dez/05 (ou aquisição) → venda
+function fatoresReducao(aqY, aqM, vdY, vdM) {
+  let m1 = 0, m2 = 0;
+  if (mesesEntre(aqY, aqM, 2005, 11) >= 0) {           // adquirido até nov/2005 (inclusive)
+    const s1Y = aqY < 1996 ? 1996 : aqY, s1M = aqY < 1996 ? 1 : aqM;
+    m1 = Math.max(0, mesesEntre(s1Y, s1M, 2005, 11));
+    m2 = Math.max(0, mesesEntre(2005, 12, vdY, vdM));
+  } else {
+    m2 = Math.max(0, mesesEntre(aqY, aqM, vdY, vdM));
+  }
+  return { m1, m2, fr1: 1 / Math.pow(FR1_TAXA, m1), fr2: 1 / Math.pow(FR2_TAXA, m2) };
+}
+
+function irGanhoProgressivo(ganho) {
+  let total = 0, piso = 0;
+  for (const f of GCAP_FAIXAS) {
+    total += Math.max(0, Math.min(ganho, f.ate) - piso) * f.aliq;
+    piso = f.ate;
+  }
+  return total;
+}
+
+function vendaPF(p) {
+  // p: venda, aquisicao, custos, aqY, aqM, vdY, vdM, unico, reinvestido
+  const custoTotal = p.aquisicao + p.custos;
+  const ganhoBruto = Math.max(0, p.venda - custoTotal);
+  const f77 = fator7713(p.aqY);
+  const fr = fatoresReducao(p.aqY, p.aqM, p.vdY, p.vdM);
+  let ganhoTrib = ganhoBruto * f77 * fr.fr1 * fr.fr2;
+  let isencao = null;
+  if (p.unico && p.venda <= ISENCAO_UNICO_LIMITE) { ganhoTrib = 0; isencao = 'unico'; }
+  else if (p.reinvestido > 0 && p.venda > 0) {
+    ganhoTrib *= Math.max(0, 1 - Math.min(p.reinvestido, p.venda) / p.venda);
+    isencao = 'reinvest';
+  }
+  const imposto = irGanhoProgressivo(ganhoTrib);
+  const impostoSemFator = irGanhoProgressivo(ganhoBruto);
+  return { ganhoBruto, f77, ...fr, ganhoTrib, isencao, imposto, impostoSemFator,
+           liquido: p.venda - imposto };
+}
+
+function vendaPJ(p) {
+  // p: venda, situacao, custoContabil, itbiPct, venal, cartorio, contabMes, meses
+  let linhas = [], imposto = 0;
+  if (p.situacao === 'imobilizado') {
+    const ganho = Math.max(0, p.venda - p.custoContabil);
+    imposto = ganho * PJ_IMOBILIZADO;
+    linhas = [['Ganho contábil (venda − custo)', ganho, false], ['IRPJ + adicional + CSLL (34%)', imposto, true]];
+  } else {
+    const baseIR = p.venda * PJV.presIRPJ;                       // presunção 8%
+    const irpj = baseIR * PJV.irpj;
+    const adicional = Math.max(0, baseIR - PJV.limiteAdicionalTri) * PJV.adicional; // venda isolada no trimestre
+    const csll = p.venda * PJV.presCSLL * PJV.csll;
+    const pis = p.venda * PJV.pis, cofins = p.venda * PJV.cofins;
+    imposto = irpj + adicional + csll + pis + cofins;
+    linhas = [
+      ['IRPJ (8% × 15%)', irpj, true],
+      ['Adicional IRPJ (10% acima de 60k/tri)', adicional, true],
+      ['CSLL (12% × 9%)', csll, true],
+      ['PIS (0,65%) + COFINS (3%)', pis + cofins, true],
+    ];
+  }
+  const estrutura = p.venal * p.itbiPct + p.cartorio + p.contabMes * p.meses;
+  return { imposto, linhas, estrutura, liquido: p.venda - imposto - estrutura };
+}
+
+/* ============================================================
+   MOTOR — MÓDULO 2: ALUGUÉIS (carnê-leão × holding presumido)
+   ============================================================ */
+function irrfTabela(base) {
+  for (const f of IRRF_TABELA) if (base <= f.ate) return Math.max(0, base * f.aliq - f.deduz);
+  return 0;
+}
+
+function aluguelPF(receita, despesas) {
+  const base = Math.max(0, receita - despesas);
+  const ir = irrfTabela(base);
+  return { base, ir, efetiva: receita > 0 ? ir / receita : 0, liquido: receita - ir };
+}
+
+function aluguelPJ(receita, contab) {
+  const base = receita * PJA.presuncao;
+  const irpj = base * PJA.irpj;
+  const adicional = Math.max(0, base - PJA.limiteAdicionalMes) * PJA.adicional;
+  const csll = base * PJA.csll;
+  const piscofins = receita * PJA.piscofins;
+  const imposto = irpj + adicional + csll + piscofins;
+  return { irpj, adicional, csll, piscofins, imposto, contab,
+           efetiva: receita > 0 ? imposto / receita : 0,
+           total: imposto + contab, liquido: receita - imposto - contab };
+}
+
+/* ============================================================
+   MOTOR — MÓDULO 3: SUCESSÃO (inventário × holding)
+   ============================================================ */
+function sucessao(p) {
+  // p: patrimonio, itcmdInv, hon, custas, itcmdDoa, itbiPct, constituicao, contabAno
+  const itcmd = p.patrimonio * p.itcmdInv, hon = p.patrimonio * p.hon, custas = p.patrimonio * p.custas;
+  const inventario = itcmd + hon + custas;
+  const doacao = p.patrimonio * p.itcmdDoa, itbi = p.patrimonio * p.itbiPct;
+  const holding = doacao + itbi + p.constituicao + p.contabAno;
+  return { itcmd, hon, custas, inventario, doacao, itbi,
+           estrutura: p.constituicao + p.contabAno, holding, economia: inventario - holding };
+}
+/* ============================================================
+   UI — helpers e abas
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const fmt0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+const pct = v => (v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+
+function parseMoney(str) {
+  if (!str) return 0;
+  let s = String(str).replace(/[^\d.,]/g, '');
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  else if (!/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\.(?=\d{3}(\.|$))/g, '');
+  else s = s.replace(/\./g, '');
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+function parseMes(v) {           // "2018-01" → {y:2018, m:1}
+  if (!v || !/^\d{4}-\d{2}$/.test(v)) return null;
+  const [y, m] = v.split('-').map(Number);
+  return { y, m };
+}
+const HOJE = new Date();
+const VD_Y = HOJE.getFullYear(), VD_M = HOJE.getMonth() + 1;
+
+let tabAtiva = 'venda';
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  tabAtiva = b.dataset.tab;
+  document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.tab-sec').forEach(s => s.classList.toggle('on', s.id === 'tab-' + tabAtiva));
+  updateLeadLink();
+}));
+
+const charts = {};
+let chartDefaultsSet = false;
+const C = { blue:'#1f53eb', navy:'#0b1c4d', yellow:'#7d97ff', ok:'#16a05f', danger:'#e8423a',
+            orange:'#fb8c3a', grid:'#eef0f7', soft:'#5d6b8a' };
+function upChart(id, cfg) {
+  const card = $(id).closest('.card');
+  if (typeof Chart === 'undefined') { if (card) card.classList.add('no-chart'); return; }
+  if (card) card.classList.remove('no-chart');
+  if (!chartDefaultsSet) {
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    Chart.defaults.font.size = 11; Chart.defaults.color = C.soft; chartDefaultsSet = true;
+  }
+  if (charts[id]) { charts[id].data = cfg.data; charts[id].options = cfg.options; charts[id].update('none'); }
+  else charts[id] = new Chart($(id), cfg);
+}
+window.addEventListener('load', () => { renderVenda(); renderAluguel(); renderHolding(); renderCarteira(); });
+
+/* ============================================================
+   UI — MÓDULO 1: VENDA
+   ============================================================ */
+function lerVenda() {
+  const dt = parseMes($('vData').value);
+  return {
+    venda: parseMoney($('vVenda').value),
+    aquisicao: parseMoney($('vAquis').value),
+    custos: parseMoney($('vCustos').value),
+    aqY: dt ? dt.y : null, aqM: dt ? dt.m : null, vdY: VD_Y, vdM: VD_M,
+    unico: $('vUnico').checked,
+    reinvestido: $('vReinv').checked ? parseMoney($('vReinvVal').value) : 0,
+    situacao: document.querySelector('input[name="vSit"]:checked').value,
+    itbiPct: (parseFloat($('vItbi').value) || 0) / 100,
+    venal: parseMoney($('vVenal').value) || parseMoney($('vAquis').value),
+    cartorio: parseFloat($('vCart').value) || 0,
+    contabMes: parseFloat($('vContab').value) || 0,
+    meses: parseFloat($('vMeses').value) || 1,
+  };
+}
+
+let vTeveResultado = false;
+function renderVenda() {
+  const p = lerVenda();
+  const ok = p.venda > 0 && p.aquisicao > 0 && p.aqY;
+  $('vPlaceholder').style.display = ok ? 'none' : 'block';
+  $('vOut').style.display = ok ? 'block' : 'none';
+  if (!ok) return;
+  if (!vTeveResultado) {            // primeira simulação completa: leva até o veredito
+    vTeveResultado = true;
+    setTimeout(() => $('vVerdict').scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+  }
+
+  const pf = vendaPF(p);
+  const pj = vendaPJ({ ...p, custoContabil: p.aquisicao + p.custos });
+  const diff = pf.liquido - pj.liquido;
+  const pfVence = diff >= 0;
+
+  // veredito
+  const v = $('vVerdict');
+  if (pf.isencao === 'unico') {
+    v.className = 'verdict win'; $('vVIco').textContent = '✓';
+    $('vVTxt').textContent = `Isenção total na PF (único imóvel até ${fmt0.format(ISENCAO_UNICO_LIMITE)}): imposto ZERO. A PJ nunca compete aqui — venda na pessoa física, sem rodeios.`;
+  } else {
+    v.className = 'verdict ' + (pfVence ? 'win' : 'neutral');
+    $('vVIco').textContent = pfVence ? '✓' : '→';
+    $('vVTxt').textContent = pfVence
+      ? `Vender na PF deixa ${fmt.format(Math.abs(diff))} a mais no bolso (${pct(Math.abs(diff) / p.venda)} da venda). Os fatores de redução por tempo de posse pesaram a favor da PF.`
+      : `Vender na PJ (estoque) deixa ${fmt.format(Math.abs(diff))} a mais no bolso. Margem alta e pouco tempo de posse favorecem o presumido (~5,93% da venda) — e com volume recorrente a estrutura dilui ainda mais.`;
+  }
+  $('vAlertaImob').style.display = p.situacao === 'imobilizado' ? 'block' : 'none';
+  const ai = $('vAlertaIsen');
+  if (pf.isencao === 'reinvest') {
+    ai.style.display = 'block';
+    ai.innerHTML = `ℹ️ Isenção de reinvestimento aplicada sobre ${pct(Math.min(p.reinvestido, p.venda) / p.venda)} da venda. Lembre: utilizável só <b>1x a cada 5 anos</b> e o novo imóvel precisa ser residencial, comprado em até 180 dias.`;
+  } else ai.style.display = 'none';
+
+  // colunas
+  $('vColPF').classList.toggle('melhor', pfVence);
+  $('vColPJ').classList.toggle('melhor', !pfVence);
+  $('vGanhoBruto').textContent = fmt.format(pf.ganhoBruto);
+  $('vRed7713').textContent = pf.f77 < 1 ? `− ${pct(1 - pf.f77)} do ganho` : 'não se aplica (pós-1988)';
+  const corteFatores = 1 - pf.fr1 * pf.fr2;
+  $('vFatores').textContent = corteFatores > 0.001
+    ? `− ${pct(corteFatores)} do ganho (${pf.m1 + pf.m2} meses de posse)`
+    : 'não se aplica ainda (venda no mês da compra)';
+  $('vGanhoTrib').textContent = fmt.format(pf.ganhoTrib);
+  $('vIrPF').textContent = `− ${fmt.format(pf.imposto)}` + (pf.impostoSemFator > pf.imposto + 1 ? ` (seria ${fmt0.format(pf.impostoSemFator)} sem os fatores)` : '');
+  $('vLiqPF').textContent = fmt.format(pf.liquido);
+  $('vTagPJ').textContent = p.situacao === 'imobilizado' ? 'ativo imobilizado (34%)' : 'presumido · estoque';
+  $('vPJlinhas').innerHTML = pj.linhas.map(([l, val, neg]) =>
+    `<div class="line${neg ? ' neg' : ''}"><span class="lbl">${l}</span><span class="val">${neg ? '− ' : ''}${fmt.format(val)}</span></div>`).join('');
+  $('vEstrut').textContent = `− ${fmt.format(pj.estrutura)}`;
+  $('vLiqPJ').textContent = fmt.format(pj.liquido);
+
+  // breakeven por margem (estoque, sem isenções)
+  const labels = [], dPF = [], dPJ = [];
+  for (let m = 0; m <= 80; m += 2) {
+    labels.push(m);
+    const aq = p.venda * (1 - m / 100);
+    dPF.push(vendaPF({ ...p, aquisicao: aq, custos: 0, unico: false, reinvestido: 0 }).imposto);
+    const sim = vendaPJ({ ...p, situacao: 'estoque', venal: aq, custoContabil: aq });
+    dPJ.push(sim.imposto + sim.estrutura);
+  }
+  const margemAtual = p.venda > 0 ? Math.round((1 - (p.aquisicao + p.custos) / p.venda) * 100) : 0;
+  upChart('vChart', {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Custo total PF (IR)', data: dPF, borderColor: C.ok, borderWidth: 2.5, pointRadius: 0, tension: .15, fill: false },
+      { label: 'Custo total PJ (tributos + estrutura)', data: dPJ, borderColor: C.blue, borderWidth: 2.5, pointRadius: 0, tension: 0, fill: false },
+      { label: 'Sua margem', data: labels.map(m => m === Math.max(0, Math.min(80, Math.round(margemAtual / 2) * 2)) ? dPF[labels.indexOf(m)] : null), borderColor: C.navy, backgroundColor: C.yellow, pointRadius: 7, pointBorderWidth: 2.5, showLine: false },
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { labels: { boxWidth: 12, usePointStyle: true } },
+        tooltip: { callbacks: { title: i => 'Margem de lucro ' + i[0].label + '%',
+          label: c => c.parsed.y == null ? null : c.dataset.label + ': ' + fmt0.format(c.parsed.y) } } },
+      scales: { x: { title: { display: true, text: 'margem de lucro na venda (%)' , font: { size: 10 } }, grid: { display: false } },
+        y: { ticks: { callback: v => fmt0.format(v) }, grid: { color: C.grid } } },
+    },
+  });
+  $('vChartCap').textContent = `Sua venda tem margem de ~${Math.max(0, margemAtual)}%. Margem alta favorece a PJ (paga ~5,93% da venda, ganhe quanto ganhar); margem baixa ou isenção favorece a PF.`;
+
+  // calculadora reversa
+  const alvo = parseMoney($('vAlvo').value);
+  if (alvo > 0) {
+    const buscar = liquidoFn => {
+      let lo = p.aquisicao + p.custos, hi = Math.max(alvo * 4, 1e6);
+      for (let i = 0; i < 60; i++) { const mid = (lo + hi) / 2; (liquidoFn(mid) < alvo) ? lo = mid : hi = mid; }
+      return hi;
+    };
+    const vPFx = buscar(vd => vendaPF({ ...p, venda: vd }).liquido);
+    const vPJx = buscar(vd => vendaPJ({ ...p, venda: vd, custoContabil: p.aquisicao + p.custos }).liquido);
+    $('vReversa').innerHTML =
+      `<div class="line"><span class="lbl">Vendendo na PF, precisa vender por</span><span class="val"><b>${fmt0.format(vPFx)}</b></span></div>` +
+      `<div class="line"><span class="lbl">Vendendo na PJ, precisa vender por</span><span class="val"><b>${fmt0.format(vPJx)}</b></span></div>`;
+  } else $('vReversa').innerHTML = '<p class="chart-cap" style="text-align:left">Digite o líquido desejado acima.</p>';
+
+  updateLeadLink();
+}
+$('vReinv').addEventListener('change', () => { $('vReinvWrap').style.display = $('vReinv').checked ? 'grid' : 'none'; agendar(renderVenda); });
+['vVenda','vAquis','vData','vCustos','vReinvVal','vItbi','vVenal','vCart','vContab','vMeses','vAlvo']
+  .forEach(id => $(id).addEventListener('input', () => agendar(renderVenda)));
+['vUnico'].forEach(id => $(id).addEventListener('change', () => agendar(renderVenda)));
+document.querySelectorAll('input[name="vSit"]').forEach(r => r.addEventListener('change', () => agendar(renderVenda)));
+
+const debounceTimers = new Map();     // um timer por módulo: trocar de aba não cancela render pendente
+function agendar(fn) { clearTimeout(debounceTimers.get(fn)); debounceTimers.set(fn, setTimeout(fn, 300)); }
+/* ============================================================
+   UI — MÓDULO 2: ALUGUÉIS
+   ============================================================ */
+function renderAluguel() {
+  const receita = parseMoney($('aReceita').value);
+  const desp = parseMoney($('aDesp').value);
+  const contab = parseFloat($('aContab').value) || 0;
+  const ok = receita > 0;
+  $('aPlaceholder').style.display = ok ? 'none' : 'block';
+  $('aOut').style.display = ok ? 'block' : 'none';
+  if (!ok) return;
+
+  const pf = aluguelPF(receita, desp);
+  const pj = aluguelPJ(receita, contab);
+  const eco = pf.ir - pj.total;            // economia mensal da holding
+  const win = eco > 0;
+  $('aVerdict').className = 'verdict ' + (win ? 'win' : 'neutral');
+  $('aVIco').textContent = win ? '✓' : '→';
+  $('aVTxt').textContent = win
+    ? `A holding economiza ${fmt.format(eco)}/mês (${fmt.format(eco * 12)}/ano): aluguel na PJ paga ${pct(pj.efetiva)} fixo, enquanto na PF você já está na faixa de ${pct(pf.base > 4664.68 ? .275 : .225)} marginal.`
+    : `Nesse volume a PF ainda compensa: o carnê-leão (${fmt.format(pf.ir)}/mês) fica abaixo do custo da holding (${fmt.format(pj.total)}/mês com contabilidade). A holding passa a valer com receita maior.`;
+
+  $('aColPF').classList.toggle('melhor', !win);
+  $('aColPJ').classList.toggle('melhor', win);
+  $('aBasePF').textContent = fmt.format(pf.base);
+  $('aIrPF').textContent = '− ' + fmt.format(pf.ir);
+  $('aEfPF').textContent = pct(pf.efetiva);
+  $('aLiqPF').textContent = `${fmt.format(pf.liquido)} · ${fmt.format(pf.liquido * 12)}`;
+  $('aIrpj').textContent = '− ' + fmt.format(pj.irpj + pj.adicional);
+  $('aCsll').textContent = '− ' + fmt.format(pj.csll);
+  $('aPisCofins').textContent = '− ' + fmt.format(pj.piscofins);
+  $('aContabL').textContent = '− ' + fmt.format(contab);
+  $('aEfPJ').textContent = pct(pj.efetiva);
+  $('aLiqPJ').textContent = `${fmt.format(pj.liquido)} · ${fmt.format(pj.liquido * 12)}`;
+
+  // curva: IR PF × custo holding por receita
+  const labels = [], dPF = [], dPJ = [];
+  for (let r = 1000; r <= 40000; r += 500) {
+    labels.push(r);
+    dPF.push(aluguelPF(r, desp).ir);
+    dPJ.push(aluguelPJ(r, contab).total);
+  }
+  const atualX = Math.max(1000, Math.min(40000, Math.round(receita / 500) * 500));
+  upChart('aChart', {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'IR na PF (carnê-leão)', data: dPF, borderColor: C.danger, borderWidth: 2.5, pointRadius: 0, tension: .15, fill: false },
+      { label: 'Custo holding (11,33% + contab.)', data: dPJ, borderColor: C.blue, borderWidth: 2.5, pointRadius: 0, tension: 0, fill: false },
+      { label: 'Você está aqui', data: labels.map(r => r === atualX ? aluguelPF(r, desp).ir : null), borderColor: C.navy, backgroundColor: C.yellow, pointRadius: 7, pointBorderWidth: 2.5, showLine: false },
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: { legend: { labels: { boxWidth: 12, usePointStyle: true } },
+        tooltip: { callbacks: { title: i => 'Receita ' + fmt0.format(i[0].label) + '/mês',
+          label: c => c.parsed.y == null ? null : c.dataset.label + ': ' + fmt.format(c.parsed.y) } } },
+      scales: { x: { ticks: { maxTicksLimit: 7, callback: function (v) { return fmt0.format(this.getLabelForValue(v)); } }, grid: { display: false } },
+        y: { ticks: { callback: v => fmt0.format(v) }, grid: { color: C.grid } } },
+    },
+  });
+  // ponto onde a holding passa a ganhar
+  let cruza = null;
+  for (let i = 0; i < labels.length; i++) if (dPF[i] > dPJ[i]) { cruza = labels[i]; break; }
+  $('aChartCap').textContent = cruza
+    ? `A holding passa a compensar a partir de ~${fmt0.format(cruza)}/mês de aluguéis (com contabilidade de ${fmt0.format(contab)}/mês incluída na conta).`
+    : 'Nesta faixa de receita a PF segue mais barata.';
+  updateLeadLink();
+}
+['aReceita','aDesp','aContab'].forEach(id => $(id).addEventListener('input', () => agendar(renderAluguel)));
+
+/* ============================================================
+   UI — MÓDULO 3: HOLDING & SUCESSÃO
+   ============================================================ */
+function lerHolding() {
+  return {
+    patrimonio: parseMoney($('hPatrimonio').value),
+    itcmdInv: (parseFloat($('hItcmd').value) || 0) / 100,
+    itcmdDoa: (parseFloat($('hItcmdDoa').value) || 0) / 100,
+    herdeiros: parseInt($('hHerdeiros').value) || 1,
+    hon: (parseFloat($('hHon').value) || 0) / 100,
+    custas: (parseFloat($('hCustas').value) || 0) / 100,
+    itbiPct: (parseFloat($('hItbi').value) || 0) / 100,
+    constituicao: parseFloat($('hConst').value) || 0,
+    contabAno: parseFloat($('hContabAno').value) || 0,
+  };
+}
+function renderHolding() {
+  const p = lerHolding();
+  const ok = p.patrimonio > 0;
+  $('hPlaceholder').style.display = ok ? 'none' : 'block';
+  $('hOut').style.display = ok ? 'block' : 'none';
+  if (!ok) return;
+  const s = sucessao(p);
+  $('hVerdict').className = 'verdict ' + (s.economia > 0 ? 'win' : 'neutral');
+  $('hVerdict').querySelector('.ico').textContent = s.economia > 0 ? '✓' : '→';
+  $('hVTxt').textContent = s.economia > 0
+    ? `Sem planejamento, seus ${p.herdeiros} herdeiro(s) pagarão ~${fmt0.format(s.inventario)} e esperarão anos com os imóveis bloqueados. Com a holding, o custo único é de ~${fmt0.format(s.holding)} — economia de ${fmt.format(s.economia)} e sucessão resolvida em vida.`
+    : `Com os parâmetros atuais o inventário (${fmt0.format(s.inventario)}) sai mais barato que a holding (${fmt0.format(s.holding)}) — mas avalie os benefícios não financeiros (proteção, aluguéis a 11,33%, sem bloqueio).`;
+  $('hItcmdVal').textContent = '− ' + fmt.format(s.itcmd);
+  $('hHonVal').textContent = '− ' + fmt.format(s.hon);
+  $('hCustasVal').textContent = '− ' + fmt.format(s.custas);
+  $('hTotalInv').textContent = fmt.format(s.inventario);
+  $('hDoaVal').textContent = '− ' + fmt.format(s.doacao);
+  $('hItbiVal').textContent = s.itbi > 0 ? '− ' + fmt.format(s.itbi) : 'R$ 0 (imunidade — confirmar)';
+  $('hEstrVal').textContent = '− ' + fmt.format(s.estrutura);
+  $('hTotalHold').textContent = fmt.format(s.holding);
+  upChart('hChart', {
+    type: 'bar',
+    data: { labels: ['Inventário', 'Holding'], datasets: [{
+      data: [s.inventario, s.holding], backgroundColor: [C.danger, C.ok], borderRadius: 8, barThickness: 30 }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + fmt.format(c.parsed.x) } } },
+      scales: { x: { ticks: { callback: v => fmt0.format(v) }, grid: { color: C.grid } }, y: { grid: { display: false } } } },
+  });
+  updateLeadLink();
+}
+['hPatrimonio','hItcmd','hItcmdDoa','hHerdeiros','hHon','hCustas','hItbi','hConst','hContabAno']
+  .forEach(id => $(id).addEventListener('input', () => agendar(renderHolding)));
+$('hPuxar').addEventListener('click', () => {
+  const tot = carteira.reduce((s, im) => s + im.mercado, 0);
+  if (tot > 0) { $('hPatrimonio').value = tot.toLocaleString('pt-BR'); renderHolding(); }
+  else alert('Cadastre imóveis na aba "Minha Carteira" primeiro.');
+});
+$('hCta').addEventListener('click', () => abrirModal());
+/* ============================================================
+   UI — MÓDULO 4: MINHA CARTEIRA (localStorage)
+   ============================================================ */
+const LS_KEY = 'madao-carteira-v1';
+let carteira = [];
+try { carteira = JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch (e) { carteira = []; }
+let editandoId = null;
+
+function salvarCarteira() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(carteira)); }
+  catch (e) {     // iframe com storage bloqueado / modo privado: mantém em memória e avisa
+    $('cPlaceholder').style.display = 'block';
+    $('cPlaceholder').innerHTML = '⚠️ <b>Este navegador não permite salvar os dados</b> (modo privado ou bloqueio de armazenamento). Seus imóveis seguem na tela, mas use <b>Exportar JSON</b> para não perdê-los ao fechar a página.';
+  }
+}
+
+$('cFinalidade').addEventListener('change', () =>
+  $('cAluguelWrap').style.display = $('cFinalidade').value === 'alugar' ? 'block' : 'none');
+
+$('cSalvar').addEventListener('click', () => {
+  const dt = parseMes($('cData').value);
+  const im = {
+    id: editandoId || ('im' + Date.now()),
+    apelido: $('cApelido').value.trim() || 'Imóvel ' + (carteira.length + 1),
+    tipo: $('cTipo').value,
+    aquisicao: parseMoney($('cAquis').value),
+    dataAq: $('cData').value,
+    aqY: dt ? dt.y : VD_Y, aqM: dt ? dt.m : VD_M,
+    mercado: parseMoney($('cMercado').value),
+    finalidade: $('cFinalidade').value,
+    aluguel: parseMoney($('cAluguel').value),
+  };
+  if (im.aquisicao <= 0 || im.mercado <= 0) { alert('Informe aquisição e valor de mercado.'); return; }
+  if (editandoId) { carteira = carteira.map(x => x.id === editandoId ? im : x); }
+  else carteira.push(im);
+  editandoId = null; $('cCancelar').style.display = 'none'; $('cSalvar').textContent = '+ Adicionar imóvel';
+  ['cApelido','cAquis','cData','cMercado','cAluguel'].forEach(id => $(id).value = '');
+  renderCarteira(); salvarCarteira();   // renderiza antes: mesmo sem storage o imóvel aparece
+});
+$('cCancelar').addEventListener('click', () => {
+  editandoId = null; $('cCancelar').style.display = 'none'; $('cSalvar').textContent = '+ Adicionar imóvel';
+  ['cApelido','cAquis','cData','cMercado','cAluguel'].forEach(id => $(id).value = '');   // evita duplicata acidental
+});
+
+// análise por imóvel: melhor estrutura (ctx = contexto da carteira inteira)
+function analisarImovel(im, ctx) {
+  ctx = ctx || { nAlugados: 1, unicoImovel: true, contabHold: 400 };
+  if (im.finalidade === 'alugar' && im.aluguel > 0) {
+    // contabilidade da holding rateada entre os imóveis alugados — coerente com o módulo 2
+    const contabRateada = ctx.nAlugados > 0 ? ctx.contabHold / ctx.nAlugados : ctx.contabHold;
+    const pf = aluguelPF(im.aluguel, 0), pj = aluguelPJ(im.aluguel, contabRateada);
+    const eco = pf.ir - pj.total;
+    return { tipo: 'alugar', impostoPF: pf.ir * 12, impostoOtim: Math.min(pf.ir, pj.total) * 12,
+             badge: eco > 0 ? ['pj', `holding: −${fmt0.format(eco)}/mês`] : ['pf', 'manter na PF'] };
+  }
+  if (im.finalidade === 'vender') {
+    const base = { venda: im.mercado, aquisicao: im.aquisicao, custos: 0, aqY: im.aqY, aqM: im.aqM,
+                   vdY: VD_Y, vdM: VD_M, unico: false, reinvestido: 0 };
+    const pf = vendaPF(base);
+    const pj = vendaPJ({ venda: im.mercado, situacao: 'estoque', custoContabil: im.aquisicao,
+                         itbiPct: 0, venal: 0, cartorio: 0, contabMes: 0, meses: 0 }); // estrutura avaliada à parte
+    // isenção do "único imóvel" só vale se for de fato o único da carteira
+    if (im.mercado <= ISENCAO_UNICO_LIMITE && ctx.unicoImovel)
+      return { tipo: 'vender', impostoPF: pf.imposto, impostoOtim: 0,
+               badge: ['isen', 'vender na PF — isenção possível (≤440k)'] };
+    const pfMelhor = pf.imposto <= pj.imposto;
+    const obs = im.mercado <= ISENCAO_UNICO_LIMITE ? ' · ≤440k: isenção só se for o único' : '';
+    return { tipo: 'vender', impostoPF: pf.imposto, impostoOtim: Math.min(pf.imposto, pj.imposto),
+             badge: pfMelhor ? ['pf', 'vender na PF — fatores de redução' + obs] : ['pj', 'avaliar PJ — margem alta' + obs] };
+  }
+  return { tipo: 'manter', impostoPF: 0, impostoOtim: 0, badge: ['pf', 'manter'] };
+}
+function ctxCarteira() {
+  return {
+    nAlugados: carteira.filter(x => x.finalidade === 'alugar' && x.aluguel > 0).length,
+    unicoImovel: carteira.length === 1,
+    contabHold: parseFloat($('aContab').value) || 400,
+  };
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+function renderCarteira() {
+  const tem = carteira.length > 0;
+  $('cListaCard').style.display = tem ? 'block' : 'none';
+  $('cPlaceholder').style.display = tem ? 'none' : 'block';
+  if (!tem) return;
+  let patrimonio = 0, ganho = 0, impPF = 0, impOtim = 0;
+  const ctx = ctxCarteira();
+  $('cTbody').innerHTML = carteira.map(im => {
+    const a = analisarImovel(im, ctx);
+    patrimonio += im.mercado; ganho += Math.max(0, im.mercado - im.aquisicao);
+    impPF += a.impostoPF; impOtim += a.impostoOtim;
+    return `<tr><td><b>${esc(im.apelido)}</b><br><span style="color:var(--text-soft)">${esc(im.tipo)}</span></td>
+      <td>${fmt0.format(im.aquisicao)}<br><span style="color:var(--text-soft)">${im.dataAq || '—'}</span></td>
+      <td>${fmt0.format(im.mercado)}${im.finalidade === 'alugar' && im.aluguel ? `<br><span style="color:var(--text-soft)">${fmt0.format(im.aluguel)}/mês</span>` : ''}</td>
+      <td>${im.finalidade}</td>
+      <td><span class="badge ${a.badge[0]}">${a.badge[1]}</span></td>
+      <td><button title="editar" data-ed="${im.id}">✏️</button><button title="excluir" data-del="${im.id}">🗑️</button></td></tr>`;
+  }).join('');
+  $('cPatrimonio').textContent = fmt0.format(patrimonio);
+  $('cGanho').textContent = fmt0.format(ganho);
+  $('cImpostoPF').textContent = fmt0.format(impPF);
+  $('cEconomia').textContent = fmt0.format(Math.max(0, impPF - impOtim));
+  $('cResumo').textContent = `Cenário "tudo na PF": ~${fmt0.format(impPF)} de impostos (vendas + 12 meses de aluguéis). Estrutura otimizada (cada imóvel na melhor opção + holding para os aluguéis): ~${fmt0.format(impOtim)} — economia potencial de ${fmt0.format(Math.max(0, impPF - impOtim))}. Estrutura/contabilidade da holding não rateadas aqui: peça a análise fina.`;
+  updateLeadLink();
+}
+$('cTbody') && document.addEventListener('click', e => {
+  const ed = e.target.closest('[data-ed]'), del = e.target.closest('[data-del]');
+  if (del) { if (confirm('Excluir este imóvel?')) { carteira = carteira.filter(x => x.id !== del.dataset.del); salvarCarteira(); renderCarteira(); } }
+  if (ed) {
+    const im = carteira.find(x => x.id === ed.dataset.ed); if (!im) return;
+    editandoId = im.id;
+    $('cApelido').value = im.apelido; $('cTipo').value = im.tipo;
+    $('cAquis').value = im.aquisicao.toLocaleString('pt-BR'); $('cData').value = im.dataAq || '';
+    $('cMercado').value = im.mercado.toLocaleString('pt-BR'); $('cFinalidade').value = im.finalidade;
+    $('cAluguel').value = im.aluguel ? im.aluguel.toLocaleString('pt-BR') : '';
+    $('cAluguelWrap').style.display = im.finalidade === 'alugar' ? 'block' : 'none';
+    $('cSalvar').textContent = 'Salvar alterações'; $('cCancelar').style.display = 'inline-block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+// exportar / importar / relatório
+$('cExport').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(carteira, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'minha-carteira-imoveis.json'; a.click();
+});
+$('cImport').addEventListener('click', () => $('cFile').click());
+$('cFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const arr = JSON.parse(r.result);
+      if (!Array.isArray(arr)) throw new Error('formato');
+      // sanitiza: só campos conhecidos, números coagidos, strings curtas
+      carteira = arr.slice(0, 200).map((x, i) => {
+        const dt = parseMes(String(x.dataAq || ''));
+        return {
+          id: 'im' + Date.now() + '_' + i,
+          apelido: String(x.apelido || 'Imóvel ' + (i + 1)).slice(0, 60),
+          tipo: ['residencial','comercial','terreno'].includes(x.tipo) ? x.tipo : 'residencial',
+          aquisicao: Math.max(0, Number(x.aquisicao) || 0),
+          dataAq: dt ? String(x.dataAq) : '',
+          aqY: dt ? dt.y : VD_Y, aqM: dt ? dt.m : VD_M,
+          mercado: Math.max(0, Number(x.mercado) || 0),
+          finalidade: ['vender','alugar','manter'].includes(x.finalidade) ? x.finalidade : 'manter',
+          aluguel: Math.max(0, Number(x.aluguel) || 0),
+        };
+      }).filter(x => x.aquisicao > 0 && x.mercado > 0);
+      renderCarteira(); salvarCarteira();
+    } catch (x) { alert('Arquivo inválido — exporte o JSON por este app.'); }
+    $('cFile').value = '';     // permite reimportar o mesmo arquivo
+  };
+  r.readAsText(f);
+});
+$('cRelatorio').addEventListener('click', () => {
+  let patrimonio = 0, impPF = 0, impOtim = 0;
+  const ctx = ctxCarteira();
+  const linhas = carteira.map(im => {
+    const a = analisarImovel(im, ctx); patrimonio += im.mercado; impPF += a.impostoPF; impOtim += a.impostoOtim;
+    return `<tr><td>${esc(im.apelido)} (${esc(im.tipo)})</td><td>${fmt0.format(im.aquisicao)}</td><td>${im.dataAq || '—'}</td><td>${fmt0.format(im.mercado)}</td><td>${im.finalidade}</td><td>${a.badge[1]}</td></tr>`;
+  }).join('');
+  $('printArea').innerHTML = `
+    <div style="font-family:Archivo,Arial,sans-serif;padding:24px;color:#16213e">
+      <div style="border-bottom:4px solid #1f53eb;padding-bottom:12px;margin-bottom:14px;display:flex;align-items:center;gap:12px">
+        <img src="site-assets/logo-madao-oficial-t.png" alt="" style="height:40px;width:auto">
+        <div>
+          <b style="font-size:1.1rem;color:#0b1c4d">${CONFIG.logoRelatorio}</b><br>
+          <span style="font-size:.85rem">Análise da carteira imobiliária${$('cCliente').value ? ' — ' + esc($('cCliente').value) : ''} · ${new Date().toLocaleDateString('pt-BR')}</span>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:.8rem">
+        <tr style="text-align:left;border-bottom:2px solid #ccc"><th>Imóvel</th><th>Aquisição</th><th>Data</th><th>Mercado</th><th>Finalidade</th><th>Recomendação</th></tr>${linhas}
+      </table>
+      <div style="margin-top:16px;font-size:.9rem">
+        <p>Patrimônio total: <b>${fmt0.format(patrimonio)}</b></p>
+        <p>Impostos estimados "tudo na PF": <b>${fmt0.format(impPF)}</b> · Estrutura otimizada: <b>${fmt0.format(impOtim)}</b></p>
+        <p style="font-size:1.05rem">Economia potencial: <b style="color:#16a05f">${fmt0.format(Math.max(0, impPF - impOtim))}</b></p>
+      </div>
+      <p style="font-size:.65rem;color:#777;margin-top:18px">Estimativas com base na legislação de jun/2026. Não constitui parecer tributário — consulte um contador. ${CONFIG.empresaNome}.</p>
+    </div>`;
+  document.body.classList.add('print-report');     // só este print mostra o relatório
+  window.print();
+});
+window.addEventListener('afterprint', () => document.body.classList.remove('print-report'));
+
+/* ============================================================
+   CTA flutuante + lead + tooltips
+   ============================================================ */
+function resumoAtivo() {
+  try {
+    const pv = lerVenda();
+    if (tabAtiva === 'venda' && pv.venda > 0 && pv.aquisicao > 0 && pv.aqY) {   // só com simulação completa
+      const pf = vendaPF(pv);
+      return `Simulei a venda de um imóvel por ${fmt0.format(pv.venda)} (IR PF estimado ${fmt0.format(pf.imposto)}).`;
+    }
+    if (tabAtiva === 'aluguel' && parseMoney($('aReceita').value) > 0)
+      return `Simulei aluguéis de ${fmt0.format(parseMoney($('aReceita').value))}/mês comparando PF × holding.`;
+    if (tabAtiva === 'holding' && parseMoney($('hPatrimonio').value) > 0) {
+      const s = sucessao(lerHolding());
+      return `Simulei a sucessão de ${fmt0.format(lerHolding().patrimonio)} — economia potencial de ${fmt0.format(Math.max(0, s.economia))} com holding.`;
+    }
+    if (tabAtiva === 'carteira' && carteira.length) return `Tenho ${carteira.length} imóvel(is) cadastrados na carteira e quero a análise fina.`;
+  } catch (e) {}
+  return 'Usei o Planejador Tributário Imobiliário.';
+}
+function updateLeadLink() {
+  const nome = $('leadNome').value.trim(), zap = $('leadZap').value.trim();
+  let msg = `Olá! Vim do Planejador Tributário Imobiliário da ${CONFIG.empresaNome}.`;
+  if (nome) msg += ` Meu nome é ${nome}.`;
+  if (zap) msg += ` Meu WhatsApp: ${zap}.`;
+  msg += ' ' + resumoAtivo() + ' Quero uma análise do meu caso.';
+  $('leadGo').href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
+}
+function abrirModal() {
+  const msgs = {
+    venda: 'Um contador confere as isenções e a melhor estrutura antes de você assinar a venda.',
+    aluguel: 'Um contador desenha a holding e mostra em quanto tempo ela se paga com seus aluguéis.',
+    holding: 'Estruturação de holding é análise caso a caso: ITCMD, ITBI e usufruto. Agende a análise do seu patrimônio.',
+    carteira: 'Envie sua carteira e receba a análise fina: estrutura ótima imóvel a imóvel, com custos rateados.',
+  };
+  $('modalLead').textContent = msgs[tabAtiva] || msgs.venda;
+  $('lead-modal').classList.add('open'); updateLeadLink();
+}
+$('fab').addEventListener('click', abrirModal);
+$('modalClose').addEventListener('click', () => $('lead-modal').classList.remove('open'));
+$('lead-modal').addEventListener('click', e => { if (e.target === $('lead-modal')) $('lead-modal').classList.remove('open'); });
+$('leadNome').addEventListener('input', updateLeadLink);
+$('leadZap').addEventListener('input', updateLeadLink);
+
+document.addEventListener('click', e => {
+  const tip = e.target.closest('.tip');
+  document.querySelectorAll('.tip.show').forEach(t => { if (t !== tip) t.classList.remove('show'); });
+  if (tip) {
+    tip.classList.toggle('show');
+    if (tip.classList.contains('show')) {
+      const r = tip.getBoundingClientRect(), half = Math.min(235, window.innerWidth * .8) / 2;
+      tip.classList.toggle('edge-l', r.left + r.width / 2 < half + 10);
+      tip.classList.toggle('edge-r', window.innerWidth - (r.left + r.width / 2) < half + 10);
+    }
+    e.preventDefault();
+  }
+});
+
+/* ============================================================
+   AUTOTESTE — cenários A–E do spec (console, venda fixada em jun/2026)
+   ============================================================ */
+(function selfTest() {
+  const ok = (label, got, want, tolPct = 2) => {
+    const tol = Math.max(1, Math.abs(want) * tolPct / 100);
+    const pass = Math.abs(got - want) <= tol;
+    console[pass ? 'log' : 'warn'](`[selfTest] ${label}: ${got.toFixed(2)} (esperado ~${want}) ${pass ? '✓' : '✗'}`);
+  };
+  // A — venda 800k, aq. 400k jan/2018
+  const A = vendaPF({ venda: 800000, aquisicao: 400000, custos: 0, aqY: 2018, aqM: 1, vdY: 2026, vdM: 6, unico: false, reinvestido: 0 });
+  ok('A: m2 = 101 meses', A.m2, 101, 0);
+  ok('A: IR PF', A.imposto, 42170);
+  const Apj = vendaPJ({ venda: 800000, situacao: 'estoque', custoContabil: 400000, itbiPct: 0, venal: 0, cartorio: 0, contabMes: 0, meses: 0 });
+  ok('A: PJ estoque (5,93% + adicional)', Apj.imposto, 47840, 0.1);
+  // B — venda 500k, aq. 300k há 12 meses (jun/2025)
+  const B = vendaPF({ venda: 500000, aquisicao: 300000, custos: 0, aqY: 2025, aqM: 6, vdY: 2026, vdM: 6, unico: false, reinvestido: 0 });
+  ok('B: IR PF (FR2≈0,959)', B.imposto, 28770);
+  const Bpj = vendaPJ({ venda: 500000, situacao: 'estoque', custoContabil: 300000, itbiPct: 0, venal: 0, cartorio: 0, contabMes: 0, meses: 0 });
+  ok('B: PJ estoque', Bpj.imposto, 29650, 0.1);
+  // C — isenção único imóvel
+  const Cx = vendaPF({ venda: 430000, aquisicao: 200000, custos: 0, aqY: 2015, aqM: 1, vdY: 2026, vdM: 6, unico: true, reinvestido: 0 });
+  ok('C: isenção único → IR zero', Cx.imposto, 0, 0);
+  // D — aluguel 10k/mês
+  const Dpf = aluguelPF(10000, 0), Dpj = aluguelPJ(10000, 400);
+  ok('D: carnê-leão', Dpf.ir, 1841.27, 0.1);
+  ok('D: holding presumido (s/ contab.)', Dpj.imposto, 1133, 0.1);
+  ok('D: economia c/ contab.', Dpf.ir - Dpj.total, 308.27, 0.5);
+  // E — sucessão 3M
+  const E = sucessao({ patrimonio: 3000000, itcmdInv: .08, hon: .06, custas: .02, itcmdDoa: .08, itbiPct: 0, constituicao: 8000, contabAno: 4800 });
+  ok('E: inventário', E.inventario, 480000, 0.1);
+  ok('E: holding', E.holding, 252800, 0.1);
+  // 7.713/88: aquisição 1980 → 45% de redução
+  ok('7.713/88 ano 1980 (fator 0,55)', fator7713(1980), 0.55, 0);
+  // Regressão (rev. adversarial): aquisição nov/2005 → FR2 conta de dez/2005 (m2=246 p/ venda jun/2026)
+  ok('Fronteira nov/2005: m2', fatoresReducao(2005, 11, 2026, 6).m2, 246, 0);
+  ok('Fronteira dez/2005: m2', fatoresReducao(2005, 12, 2026, 6).m2, 246, 0);
+  ok('Fronteira out/2005: m1', fatoresReducao(2005, 10, 2026, 6).m1, 1, 0);
+})();
+
+renderVenda(); renderAluguel(); renderHolding(); renderCarteira();
+const fin = $('cFinalidade'); if (fin.value === 'alugar') $('cAluguelWrap').style.display = 'block';
+</script>
+</body>
+</html>

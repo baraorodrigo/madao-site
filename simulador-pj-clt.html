@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador PJ x CLT — Madao Contabilidade</title>
+<meta name="description" content="Compare seu salário CLT com abrir uma PJ no Simples Nacional (Fator R). Descubra quanto precisa faturar para ganhar mais como PJ.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ============================================================
+   TEMA — identidade visual Madao Contabilidade
+   azul #3848DD · amarelo #1f53eb · navy rgb(11,28,77) · Montserrat
+   ============================================================ */
+:root{
+  --blue:#1f53eb;
+  --blue-dark:#1640c9;
+  --blue-soft:#eef0fd;
+  --navy:#0b1c4d;
+  --yellow:#1f53eb;          /* azul do logo (ex-amarelo) */
+  --yellow-soft:#eef2ff;
+  --ok:#16a05f;
+  --ok-soft:#e6f7ef;
+  --danger:#e8423a;
+  --danger-soft:#fdecec;
+  --warn:#f59e0b;
+  --bg:#f4f6fb;
+  --card:#ffffff;
+  --text:#16213e;
+  --text-soft:#5d6b8a;
+  --border:#e4e8f3;
+  --radius:16px;
+  --shadow:0 2px 14px rgba(11,28,77,.08);
+  --font:'Archivo','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
+  --display:'Sora','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;padding-bottom:92px}
+.wrap{max-width:1060px;margin:0 auto;padding:16px}
+
+/* ---------- header ---------- */
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--blue) 90%);color:#fff;padding:30px 16px 34px;text-align:center;border-bottom:5px solid var(--yellow)}
+header .brand{display:inline-flex;align-items:center;gap:8px;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;background:rgba(255,255,255,.12);padding:6px 14px;border-radius:99px;margin-bottom:12px}
+header .brand img{width:20px;height:20px;border-radius:50%;object-fit:cover;display:inline-block}
+header h1,.kpi .num,.kpi b,.slider-top .cur,.gauge-center b,.opp .big,.big,.bignum,.smini .v,.numeros b{font-family:var(--display)}
+header h1{font-size:1.7rem;font-weight:800;letter-spacing:-.02em}
+header h1 em{font-style:normal;color:var(--yellow)}
+header p{opacity:.92;font-size:.92rem;max-width:620px;margin:8px auto 0;font-weight:400}
+
+/* ---------- cards ---------- */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-top:16px}
+.card h2{font-size:.82rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);font-weight:700}
+.card h2::before{content:'';width:14px;height:3px;border-radius:2px;background:var(--yellow)}
+
+/* ---------- inputs ---------- */
+.fields{display:grid;grid-template-columns:1fr;gap:14px}
+@media(min-width:680px){.fields{grid-template-columns:1.4fr 1fr .7fr}}
+.field label{display:flex;align-items:center;gap:5px;font-size:.78rem;font-weight:700;margin-bottom:6px;color:var(--text-soft)}
+.field input,.field select{width:100%;padding:12px 13px;border:1.5px solid var(--border);border-radius:11px;font-size:1.05rem;font-family:inherit;background:#fff;color:var(--text);font-weight:600}
+.field input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+.field .hint{font-size:.72rem;color:var(--text-soft);margin-top:4px;font-weight:400}
+.field.main input{border-color:var(--blue);font-weight:800;font-size:1.25rem;color:var(--navy)}
+.chips{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.chips button{border:1.5px solid var(--border);background:#fff;border-radius:99px;padding:6px 13px;font-size:.78rem;font-weight:700;color:var(--text-soft);cursor:pointer;font-family:inherit;transition:all .12s}
+.chips button:hover{border-color:var(--blue);color:var(--blue)}
+.chips button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* acordeão avançado */
+details.adv{margin-top:16px;border:1px solid var(--border);border-radius:12px;background:#fafbfe}
+details.adv summary{cursor:pointer;padding:12px 16px;font-weight:700;font-size:.82rem;color:var(--text-soft);list-style:none;display:flex;align-items:center;gap:7px}
+details.adv summary::-webkit-details-marker{display:none}
+details.adv summary::before{content:'▸';transition:transform .15s;color:var(--blue)}
+details.adv[open] summary::before{transform:rotate(90deg)}
+details.adv .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 16px 12px}
+@media(min-width:680px){details.adv .grid{grid-template-columns:repeat(3,1fr)}}
+details.adv .field input{font-size:.92rem;padding:9px 11px;font-weight:600}
+.toggle-row{display:flex;align-items:center;gap:9px;padding:8px 16px}
+.toggle-row input{width:18px;height:18px;accent-color:var(--blue);flex:none}
+.toggle-row label{margin:0;font-size:.82rem;font-weight:600;color:var(--text-soft);display:flex;align-items:center;gap:5px}
+
+/* ---------- tooltip (tap-friendly) ---------- */
+.tip{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--text-soft);color:#fff;font-size:.66rem;font-weight:800;cursor:pointer;position:relative;border:none;vertical-align:middle;flex:none;font-family:inherit}
+.tip::before{content:'';position:absolute;inset:-13px}  /* área de toque ~43px sem mudar o visual */
+.tip::after{content:attr(data-tip);position:absolute;bottom:140%;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 12px;border-radius:9px;font-size:.75rem;font-weight:400;width:min(235px,80vw);text-align:left;opacity:0;pointer-events:none;transition:opacity .15s;z-index:60;line-height:1.45;text-transform:none;letter-spacing:0}
+.tip.edge-l::after{left:-8px;transform:none}
+.tip.edge-r::after{left:auto;right:-8px;transform:none}
+.tip.show::after,.tip:hover::after,.tip:focus-visible::after{opacity:1}
+
+/* ---------- KPI row ---------- */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+@media(min-width:780px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;position:relative}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--border);border-radius:var(--radius) var(--radius) 0 0}
+.kpi.k-clt::before{background:var(--navy)}
+.kpi.k-pj::before{background:var(--blue)}
+.kpi.k-diff.win::before{background:var(--ok)}
+.kpi.k-diff.lose::before{background:var(--danger)}
+.kpi.k-eq::before{background:var(--yellow)}
+.kpi .lbl{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--text-soft);display:flex;align-items:center;gap:5px;min-height:30px}
+.kpi .num{font-size:clamp(1.15rem,3.4vw,1.55rem);font-weight:800;color:var(--navy);margin-top:4px;letter-spacing:-.02em}
+.kpi.k-diff.win .num{color:var(--ok)}
+.kpi.k-diff.lose .num{color:var(--danger)}
+.kpi .sub{font-size:.7rem;color:var(--text-soft);margin-top:3px;font-weight:600}
+
+/* ---------- veredito ---------- */
+#verdict{margin-top:16px;border-radius:var(--radius);padding:16px 20px;display:flex;align-items:center;gap:14px;font-weight:600;font-size:.95rem;box-shadow:var(--shadow)}
+#verdict.win{background:var(--ok-soft);color:#0c5c38;border-left:6px solid var(--ok)}
+#verdict.lose{background:var(--danger-soft);color:#8c1f1a;border-left:6px solid var(--danger)}
+#verdict .ico{font-size:1.5rem;flex:none}
+
+/* ---------- slider central ---------- */
+.slider-card{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff}
+.slider-card h2{color:rgba(255,255,255,.75)}
+.slider-card h2::before{background:#9db1ff}
+.slider-top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}
+.slider-top .cur{font-size:clamp(1.5rem,5vw,2rem);font-weight:800;color:#9db1ff;letter-spacing:-.02em}
+.slider-top .lab{font-size:.78rem;opacity:.85}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:34px;background:transparent;margin-top:6px}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:5px;background:rgba(255,255,255,.25)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--yellow);margin-top:-9px;cursor:grab;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+input[type=range]::-moz-range-track{height:8px;border-radius:5px;background:rgba(255,255,255,.25)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--yellow);cursor:grab;border:3px solid #fff}
+.slider-marks{display:flex;justify-content:space-between;font-size:.68rem;opacity:.7;font-weight:600}
+.eq-pill{margin-top:12px;background:rgba(255,255,255,.13);border:1px dashed rgba(157,177,255,.6);border-radius:11px;padding:10px 14px;font-size:.84rem;text-align:center}
+.eq-pill b{color:#9db1ff}
+.eq-pill button{background:var(--yellow);color:#fff;border:none;border-radius:99px;padding:4px 12px;font-size:.74rem;font-weight:800;cursor:pointer;font-family:inherit;margin-left:8px}
+
+/* ---------- grid de gráficos ---------- */
+.charts{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
+@media(min-width:780px){.charts{grid-template-columns:1fr 1fr}.charts .span2{grid-column:span 2}}
+.chart-box{position:relative;height:250px}
+.chart-box.tall{height:290px}
+.chart-cap{font-size:.74rem;color:var(--text-soft);text-align:center;margin-top:10px;font-weight:500}
+.donut-wrap{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.donut-cell{position:relative;height:215px}
+.donut-cell .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;transform:translateY(12px)}
+.donut-cell .center b{font-size:1rem;color:var(--navy)}
+.donut-cell .center span{font-size:.62rem;color:var(--text-soft);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.donut-title{text-align:center;font-size:.78rem;font-weight:800;color:var(--text-soft);margin-bottom:2px}
+/* gauge fator R */
+.gauge-wrap{position:relative;height:180px;margin-top:6px}
+.gauge-center{position:absolute;left:0;right:0;bottom:22px;text-align:center;pointer-events:none}
+.gauge-center b{font-size:1.7rem;font-weight:800;color:var(--navy);display:block;line-height:1.1}
+.gauge-center span{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.gauge-center.a3 b,.gauge-center.a3 span{color:var(--ok)}
+.gauge-center.a5 b,.gauge-center.a5 span{color:var(--danger)}
+.fr-note{font-size:.8rem;color:var(--text-soft);text-align:center;margin-top:12px;line-height:1.5}
+.gauge-scale{display:flex;justify-content:space-between;font-size:.68rem;color:var(--text-soft);font-weight:700;margin-top:-14px}
+.gauge-scale .mark{color:var(--danger)}
+.anexo-tag{display:inline-block;padding:3px 12px;border-radius:99px;font-weight:800;font-size:.74rem;margin-bottom:4px}
+.anexo-tag.a3{background:var(--ok-soft);color:var(--ok)}
+.anexo-tag.a5{background:var(--danger-soft);color:var(--danger)}
+
+/* ---------- visão da empresa ---------- */
+#empresa{border-left:6px solid var(--yellow)}
+#empresa .grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}
+@media(min-width:680px){#empresa .grid{grid-template-columns:repeat(3,1fr)}}
+#empresa .ekpi{background:var(--bg);border-radius:12px;padding:14px;text-align:center}
+#empresa .ekpi b{display:block;font-size:1.3rem;color:var(--navy);font-weight:800}
+#empresa .ekpi.eco b{color:var(--ok)}
+#empresa .ekpi span{font-size:.72rem;color:var(--text-soft);font-weight:600}
+.pct-bar{margin-top:14px;background:var(--border);border-radius:8px;height:26px;position:relative;overflow:hidden}
+.pct-bar i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--blue),var(--blue-dark));border-radius:8px;transition:width .3s}
+.pct-bar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+#empresa p.exp{font-size:.84rem;color:var(--text-soft);margin-top:6px}
+
+/* ---------- memória de cálculo ---------- */
+details.memo{margin-top:16px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+details.memo summary{cursor:pointer;padding:16px 20px;font-weight:700;font-size:.88rem;color:var(--blue);list-style:none;display:flex;align-items:center;gap:8px}
+details.memo summary::-webkit-details-marker{display:none}
+details.memo summary::before{content:'▸';transition:transform .15s}
+details.memo[open] summary::before{transform:rotate(90deg)}
+.compare{display:grid;grid-template-columns:1fr;gap:14px;padding:0 20px 20px}
+@media(min-width:680px){.compare{grid-template-columns:1fr 1fr}}
+.col{border:1px solid var(--border);border-radius:12px;padding:16px}
+.col h3{font-size:.92rem;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-weight:800}
+.col h3 .tag{font-size:.64rem;padding:3px 10px;border-radius:99px;background:var(--bg);color:var(--text-soft);font-weight:700}
+.line{display:flex;justify-content:space-between;font-size:.85rem;padding:5px 0;border-bottom:1px dashed var(--border)}
+.line:last-of-type{border-bottom:none}
+.line .lbl{color:var(--text-soft);display:flex;align-items:center;gap:5px}
+.line.neg .val{color:var(--danger);font-weight:600}
+.line.total{font-weight:800;font-size:1rem;border-top:2px solid var(--border);margin-top:6px;padding-top:9px}
+.line.total .lbl{color:var(--text)}
+
+/* ---------- CTA ---------- */
+#cta-btn{position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--yellow);color:#fff;border:none;width:100%;padding:18px;font-size:1.02rem;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 -4px 18px rgba(11,28,77,.22);letter-spacing:.01em}
+#cta-btn:hover{filter:brightness(1.05)}
+#lead-modal{position:fixed;inset:0;background:rgba(11,28,77,.6);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+#lead-modal.open{display:flex}
+#lead-modal .box{background:#fff;border-radius:18px;padding:26px;max-width:410px;width:100%;position:relative;border-top:6px solid var(--yellow)}
+#lead-modal h3{margin-bottom:4px;color:var(--navy);font-weight:800}
+#lead-modal p{font-size:.85rem;color:var(--text-soft);margin-bottom:14px}
+#lead-modal .field{margin-bottom:12px}
+#lead-modal .close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-soft)}
+.btn{display:block;width:100%;background:var(--blue);color:#fff;border:none;padding:15px;border-radius:11px;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none}
+.btn:hover{background:var(--blue-dark)}
+
+/* ---------- relatório de negociação ---------- */
+#negCard{border-left:6px solid var(--blue)}
+.neg-brandrow{display:flex;align-items:center;gap:11px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--yellow)}
+.neg-brandrow img{height:34px;width:auto}
+.neg-brandrow b{display:block;font-size:.95rem;color:var(--navy);font-family:var(--display)}
+.neg-brandrow span{font-size:.7rem;color:var(--text-soft)}
+.neg-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:10px}
+@media(min-width:680px){.neg-grid{grid-template-columns:1fr 1fr}}
+.neg-col{border:1px solid var(--border);border-radius:12px;padding:16px}
+.neg-col h3{font-size:.9rem;font-weight:800;margin-bottom:10px}
+.neg-sub{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:14px 0 4px;font-weight:700}
+.neg-zone-title{font-size:.9rem;font-weight:800;margin:20px 0 34px}
+.neg-bar{position:relative;height:14px;border-radius:8px;background:linear-gradient(90deg,var(--ok),var(--blue));margin:0 10px 58px}
+.neg-bar .mk{position:absolute;top:-9px;width:3px;height:32px;background:var(--navy);border-radius:2px;transform:translateX(-50%)}
+.neg-bar .mk::after{content:attr(data-l);position:absolute;top:34px;left:50%;transform:translateX(-50%);font-size:.7rem;font-weight:700;color:var(--text-soft);white-space:nowrap}
+.neg-bar .mk.justo{background:var(--yellow);width:6px;height:36px;top:-11px;box-shadow:0 0 0 2px #fff}
+.neg-bar .mk.justo::after{color:var(--navy)}
+.neg-args{margin:10px 0 16px 18px;font-size:.86rem}
+.neg-args li{margin-bottom:9px;line-height:1.5}
+.neg-args b{color:var(--blue-dark)}
+.mini-cta{display:inline-block;background:var(--yellow);color:#fff;border:none;border-radius:99px;padding:10px 18px;font-size:.84rem;font-weight:800;cursor:pointer;font-family:inherit}
+.neg-rodape{font-size:.68rem;color:var(--text-soft);margin-top:12px}
+@media print{
+  body{padding:0;background:#fff}
+  #cta-btn{display:none!important}
+  /* só o print disparado pelo botão isola o relatório (sem páginas em branco) */
+  body.print-report > *:not(.wrap){display:none!important}
+  body.print-report .wrap > :not(#results){display:none!important}
+  body.print-report #results > :not(#negCard){display:none!important}
+  body.print-report #negCard{box-shadow:none;border:none;margin:0}
+  body.print-report #negPrint{display:none!important}
+}
+
+/* ---------- footer ---------- */
+footer{margin-top:24px;font-size:.73rem;color:var(--text-soft)}
+footer details{margin-top:10px;border:1px solid var(--border);border-radius:10px;padding:11px;background:#fff}
+footer summary{cursor:pointer;font-weight:700}
+footer ul{margin:8px 0 0 18px}
+footer li{margin-bottom:4px}
+
+#results{display:none;scroll-margin-top:10px}
+#results.show{display:block}
+/* fallback sem Chart.js: esconde gráficos, mantém os números */
+.card.no-chart .chart-box,.card.no-chart .chart-cap,.card.no-chart .donut-wrap{display:none}
+.card.no-chart .gauge-wrap{height:96px}
+.card.no-chart .gauge-wrap canvas{display:none}
+.card.no-chart .gauge-scale{display:none}
+.placeholder{text-align:center;color:var(--text-soft);padding:42px 16px;font-size:.95rem}
+.placeholder b{color:var(--blue)}
+
+/* ---------- topbar com logo oficial (padrão do site) ---------- */
+.topbar{background:#fff;border-bottom:1px solid var(--border)}
+.topbar .in{max-width:1060px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.topbar img{height:36px;width:auto;display:block}
+.topbar a.tz{background:var(--blue);color:#fff;text-decoration:none;font-weight:700;font-size:.8rem;padding:10px 18px;border-radius:99px;white-space:nowrap}
+.topbar a.tz:hover{background:var(--blue-dark)}
+@media(max-width:480px){.topbar img{height:30px}.topbar a.tz{font-size:.72rem;padding:9px 14px}}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <a href="https://www.madaocontabilidade.com" aria-label="Madao Contabilidade"><img src="site-assets/logo-madao-oficial-t.png" alt="Madao Contabilidade"></a>
+  <a class="tz" href="https://wa.me/5548998129815">Falar no WhatsApp</a>
+</div></div>
+<header>
+  <h1>Simulador <em>PJ × CLT</em></h1>
+  <p>Descubra em segundos quanto você precisa faturar como PJ no Simples Nacional para ganhar mais do que na CLT — e quanto a empresa economiza.</p>
+</header>
+
+<div class="wrap">
+
+  <!-- ======== INPUTS ======== -->
+  <section class="card">
+    <h2>Comece pelo seu salário</h2>
+    <div class="fields">
+      <div class="field main">
+        <label for="inSalario">Salário CLT mensal bruto (R$)</label>
+        <input type="text" id="inSalario" inputmode="decimal" placeholder="ex.: 13.000">
+        <div class="chips" id="chips">
+          <button data-v="5000">R$ 5.000</button>
+          <button data-v="8000">R$ 8.000</button>
+          <button data-v="13000">R$ 13.000</button>
+          <button data-v="20000">R$ 20.000</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="inFaturamento">Faturamento PJ mensal (R$)
+          <button class="tip" data-tip="Quanto você pretende cobrar por mês como PJ. Deixe vazio para o simulador calcular automaticamente o valor que empata com seu líquido CLT.">?</button>
+        </label>
+        <input type="text" id="inFaturamento" inputmode="decimal" placeholder="auto (equivalência)">
+        <div class="hint">Vazio = calcula o ponto de empate. O slider abaixo também controla.</div>
+      </div>
+      <div class="field">
+        <label for="inDependentes">Dependentes (IRRF)</label>
+        <input type="number" id="inDependentes" min="0" max="20" step="1" value="0">
+      </div>
+    </div>
+
+    <details class="adv">
+      <summary>Ajustes avançados (contabilidade, encargos, pró-labore…)</summary>
+      <div class="grid">
+        <div class="field"><label>Meses CLT no ano (com 13º)</label><input type="number" id="advMeses" value="13" step="1" min="12" max="14"></div>
+        <div class="field"><label>FGTS empregador (%)</label><input type="number" id="advFgts" value="8" step="0.5" min="0"></div>
+        <div class="field"><label>INSS patronal + terceiros (%)</label><input type="number" id="advPatronal" value="20" step="0.5" min="0"></div>
+        <div class="field"><label>Dedução por dependente IRRF (R$)</label><input type="number" id="advDedDep" value="189.59" step="0.01" min="0"></div>
+        <div class="field"><label>Contabilidade mensal PJ (R$)</label><input type="number" id="advContab" value="300" step="10" min="0"></div>
+        <div class="field"><label>Custos admin. mensais PJ (R$)
+          <button class="tip" data-tip="Banco PJ, certificado digital, softwares e outras despesas fixas da empresa.">?</button>
+        </label><input type="number" id="advAdmin" value="150" step="10" min="0"></div>
+        <div class="field"><label>Custo de abertura da PJ (R$)
+          <button class="tip" data-tip="Taxas de abertura/alteração do CNPJ. Descontado apenas no resultado do 1º ano.">?</button>
+        </label><input type="number" id="advAbertura" value="600" step="50" min="0"></div>
+        <div class="field"><label>Fator R mínimo (%)</label><input type="number" id="advFatorR" value="28" step="0.5" min="0"></div>
+        <div class="field"><label>CPP patronal s/ pró-labore (%)
+          <button class="tip" data-tip="No Simples Nacional (fora do Anexo IV) a contribuição patronal já está dentro do DAS — por isso o padrão é 0%.">?</button>
+        </label><input type="number" id="advCpp" value="0" step="0.5" min="0"></div>
+      </div>
+      <div class="toggle-row">
+        <input type="checkbox" id="advDiluir" checked>
+        <label for="advDiluir">Diluir 13º e férias da CLT no comparativo mensal
+          <button class="tip" data-tip="Como PJ você não recebe 13º nem 1/3 de férias. Com isso ligado, o PJ é comparado com a média mensal do CLT no ano (13 salários + terço de férias ÷ 12) — a comparação justa. Desligando, compara mês contra mês.">?</button>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <input type="checkbox" id="advSimplificado" checked>
+        <label for="advSimplificado">Usar desconto simplificado do IRRF (R$ 607,20)
+          <button class="tip" data-tip="O IRRF permite trocar as deduções legais (INSS + dependentes) por um desconto fixo de R$ 607,20. O simulador usa automaticamente o maior dos dois.">?</button>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <input type="checkbox" id="advPlAuto" checked>
+        <label for="advPlAuto">Pró-labore automático pelo mínimo do Fator R
+          <button class="tip" data-tip="Pró-labore é o 'salário' do dono da PJ. Para garantir o Anexo III (imposto menor), ele precisa ser pelo menos 28% do faturamento. Desmarque para informar um valor manual.">?</button>
+        </label>
+      </div>
+      <div class="field" id="plManualWrap" style="display:none;padding:0 16px 16px">
+        <label>Pró-labore mensal manual (R$)</label>
+        <input type="number" id="advPlManual" value="0" step="100" min="0">
+      </div>
+    </details>
+  </section>
+
+  <div class="placeholder" id="placeholder">↑ Digite seu salário (ou toque num valor de exemplo) e o <b>dashboard completo</b> aparece aqui.</div>
+
+  <!-- ======== DASHBOARD ======== -->
+  <section id="results">
+
+    <!-- KPIs -->
+    <div class="kpis">
+      <div class="kpi k-clt">
+        <div class="lbl">Líquido CLT /mês
+          <button class="tip" data-tip="Salário bruto menos INSS e IRRF. É o que cai na sua conta hoje.">?</button>
+        </div>
+        <div class="num" id="kClt"></div>
+        <div class="sub" id="kCltSub"></div>
+      </div>
+      <div class="kpi k-pj">
+        <div class="lbl">Líquido PJ /mês
+          <button class="tip" data-tip="Faturamento menos DAS (Simples), INSS e IRRF do pró-labore, contabilidade e custos administrativos.">?</button>
+        </div>
+        <div class="num" id="kPj"></div>
+        <div class="sub" id="kPjSub"></div>
+      </div>
+      <div class="kpi k-diff" id="kDiffCard">
+        <div class="lbl">Diferença /mês</div>
+        <div class="num" id="kDiff"></div>
+        <div class="sub" id="kDiffSub"></div>
+      </div>
+      <div class="kpi k-eq">
+        <div class="lbl">Empata faturando
+          <button class="tip" data-tip="O menor faturamento mensal como PJ que entrega o mesmo dinheiro líquido no bolso que seu salário CLT.">?</button>
+        </div>
+        <div class="num" id="kEq"></div>
+        <div class="sub" id="kEqSub"></div>
+      </div>
+    </div>
+
+    <!-- veredito -->
+    <div id="verdict"><span class="ico" id="vIco"></span><span id="vTxt"></span></div>
+
+    <!-- slider central -->
+    <div class="card slider-card">
+      <h2>Simule o faturamento PJ</h2>
+      <div class="slider-top">
+        <span class="cur" id="sliderOut"></span>
+        <span class="lab">arraste — tudo recalcula na hora</span>
+      </div>
+      <input type="range" id="slider" min="5000" max="50000" step="50">
+      <div class="slider-marks"><span>R$ 5 mil</span><span>R$ 27,5 mil</span><span>R$ 50 mil</span></div>
+      <div class="eq-pill" id="eqPill"></div>
+    </div>
+
+    <!-- gráficos -->
+    <div class="charts">
+
+      <div class="card span2" style="margin-top:0">
+        <h2>Curva do líquido PJ × linha CLT</h2>
+        <div class="chart-box tall"><canvas id="chartLine"></canvas></div>
+        <div class="chart-cap">Onde a curva azul cruza a linha tracejada é o ponto de empate. A bolinha amarela é o seu faturamento simulado.</div>
+      </div>
+
+      <div class="card" style="margin-top:0">
+        <h2>Para onde vai o dinheiro</h2>
+        <div class="donut-wrap">
+          <div>
+            <div class="donut-title">CLT</div>
+            <div class="donut-cell">
+              <canvas id="donutClt"></canvas>
+              <div class="center"><b id="dCltPct"></b><span>vira líquido</span></div>
+            </div>
+          </div>
+          <div>
+            <div class="donut-title">PJ</div>
+            <div class="donut-cell">
+              <canvas id="donutPj"></canvas>
+              <div class="center"><b id="dPjPct"></b><span>vira líquido</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-cap">Composição de cada real do bruto (CLT) e do faturamento (PJ).</div>
+      </div>
+
+      <div class="card" style="margin-top:0">
+        <h2>Fator R
+          <button class="tip" data-tip="Fator R = folha de pagamento (pró-labore) dos últimos 12 meses ÷ faturamento dos últimos 12 meses. Com 28% ou mais, a PJ cai no Anexo III, que tem imposto bem menor.">?</button>
+        </h2>
+        <div class="gauge-wrap">
+          <canvas id="gauge"></canvas>
+          <div class="gauge-center" id="gaugeCenter"><b id="gVal"></b><span id="gAnexo"></span></div>
+        </div>
+        <div class="gauge-scale"><span>0%</span><span class="mark">▲ 28% — divisa Anexo V / III</span><span>60%+</span></div>
+        <div class="fr-note" id="frNote"></div>
+      </div>
+
+      <div class="card span2" style="margin-top:0">
+        <h2>No ano, no bolso</h2>
+        <div class="chart-box"><canvas id="chartYear"></canvas></div>
+        <div class="chart-cap" id="yearCap"></div>
+      </div>
+
+    </div>
+
+    <!-- visão da empresa -->
+    <div class="card" id="empresa">
+      <h2>Para quem contrata</h2>
+      <p class="exp" id="empresaTexto"></p>
+      <div class="grid">
+        <div class="ekpi"><b id="empCusto"></b><span>custo CLT real /mês<br>(13º, férias, FGTS, INSS patronal)</span></div>
+        <div class="ekpi eco"><b id="empEco"></b><span>economia /mês<br>contratando PJ na equivalência</span></div>
+        <div class="ekpi eco"><b id="empEcoAno"></b><span>economia /ano</span></div>
+      </div>
+      <div class="pct-bar"><i id="pctBarFill"></i><span id="pctBarTxt"></span></div>
+    </div>
+
+    <!-- relatório de negociação -->
+    <div class="card" id="negCard">
+      <div class="neg-brandrow">
+        <img src="site-assets/logo-madao-oficial-t.png" alt="Madao Contabilidade" style="height:34px;width:auto">
+        <div><span>Imbituba/SC · (48) 99812-9815 · madaocontabilidade.com</span></div>
+      </div>
+      <h2>Relatório de negociação — leve pra conversa</h2>
+      <p style="font-size:.88rem;color:var(--text-soft)" id="negIntro"></p>
+      <div class="neg-grid">
+        <div class="neg-col">
+          <h3>O que você deixa de receber como PJ</h3>
+          <div class="line"><span class="lbl">FGTS (8% s/ salários, 13º e férias)
+            <button class="tip" data-tip="Depósito mensal feito pela empresa numa conta em seu nome. Como PJ, esse dinheiro simplesmente deixa de existir — ele precisa estar embutido no valor que você cobra.">?</button>
+          </span><span class="val" id="negFgts"></span></div>
+          <div class="line"><span class="lbl">13º salário (líquido)</span><span class="val" id="neg13"></span></div>
+          <div class="line"><span class="lbl">⅓ de férias (líquido)</span><span class="val" id="negFerias"></span></div>
+          <div class="line total"><span class="lbl">Total recorrente que some /ano</span><span class="val" id="negRecTotal"></span></div>
+          <h4 class="neg-sub">Proteções que você perde (valor potencial)</h4>
+          <div class="line"><span class="lbl">Multa de 40% do FGTS (por ano trabalhado)</span><span class="val" id="negMulta"></span></div>
+          <div class="line"><span class="lbl">Seguro-desemprego (até 5 parcelas)</span><span class="val" id="negSeguro"></span></div>
+          <div class="line"><span class="lbl">Aviso prévio indenizado</span><span class="val" id="negAviso"></span></div>
+          <div class="line"><span class="lbl">Base INSS p/ aposentadoria e auxílios
+            <button class="tip" data-tip="Na CLT você contribui sobre o salário (até o teto). Como PJ, só sobre o pró-labore — aposentadoria, auxílio-doença e licença-maternidade ficam menores. Dá pra complementar por conta própria, mas é custo seu.">?</button>
+          </span><span class="val" id="negInssBase"></span></div>
+        </div>
+        <div class="neg-col">
+          <h3>O que a empresa ganha com você PJ</h3>
+          <div class="line"><span class="lbl">Custo real CLT (encargos inclusos)</span><span class="val" id="negCustoClt"></span></div>
+          <div class="line neg"><span class="lbl">INSS patronal que ela deixa de pagar</span><span class="val" id="negPatronal"></span></div>
+          <div class="line neg"><span class="lbl">FGTS que ela deixa de depositar</span><span class="val" id="negFgtsEmp"></span></div>
+          <div class="line neg"><span class="lbl">13º + férias que ela deixa de provisionar</span><span class="val" id="negProv"></span></div>
+          <div class="line"><span class="lbl">Te pagando o piso de equivalência</span><span class="val" id="negPiso"></span></div>
+          <div class="line total"><span class="lbl">Economia da empresa /ano</span><span class="val" id="negEcoEmp"></span></div>
+        </div>
+      </div>
+      <h3 class="neg-zone-title">Zona de negociação justa — qualquer valor aqui é ganha-ganha</h3>
+      <div class="neg-bar">
+        <span class="mk piso" id="negMkPiso" style="left:0%"></span>
+        <span class="mk justo" id="negMkJusto" style="left:50%"></span>
+        <span class="mk teto" id="negMkTeto" style="left:100%"></span>
+      </div>
+      <ul class="neg-args" id="negArgs"></ul>
+      <button class="mini-cta" id="negPrint">Imprimir / salvar em PDF →</button>
+      <div class="neg-rodape">Gerado pelo Simulador PJ × CLT · Madao Contabilidade · (48) 99812-9815 · <span id="negData"></span> · valores estimados com tabelas de jun/2026 — confirme com um contador.</div>
+    </div>
+
+    <!-- memória de cálculo -->
+    <details class="memo">
+      <summary>Ver memória de cálculo completa (linha a linha)</summary>
+      <div class="compare">
+        <div class="col">
+          <h3>CLT <span class="tag">carteira assinada</span></h3>
+          <div class="line"><span class="lbl">Salário bruto</span><span class="val" id="cltBruto"></span></div>
+          <div class="line neg"><span class="lbl">INSS
+            <button class="tip" data-tip="Contribuição previdenciária do empregado, calculada por faixas progressivas até o teto de R$ 8.157,41.">?</button>
+          </span><span class="val" id="cltInss"></span></div>
+          <div class="line neg"><span class="lbl">IRRF
+            <button class="tip" data-tip="Imposto de Renda retido na fonte, sobre o salário menos as deduções (INSS, dependentes ou desconto simplificado).">?</button>
+          </span><span class="val" id="cltIrrf"></span></div>
+          <div class="line total"><span class="lbl">Líquido mensal</span><span class="val" id="cltLiqM"></span></div>
+          <div class="line"><span class="lbl">1/3 de férias (líquido)
+            <button class="tip" data-tip="O adicional de um terço do salário pago nas férias, com os mesmos descontos proporcionais.">?</button>
+          </span><span class="val" id="cltTerco"></span></div>
+          <div class="line"><span class="lbl">Líquido anual (13 sal. + ⅓ férias)</span><span class="val" id="cltLiqA"></span></div>
+          <div class="line total"><span class="lbl">Média mensal (anual ÷ 12)</span><span class="val" id="cltMedia"></span></div>
+        </div>
+        <div class="col">
+          <h3>PJ <span class="tag">Simples Nacional</span></h3>
+          <div class="line"><span class="lbl">Faturamento</span><span class="val" id="pjFat"></span></div>
+          <div class="line neg"><span class="lbl">DAS (Simples)
+            <button class="tip" data-tip="Documento de Arrecadação do Simples: guia única mensal que reúne os tributos da PJ. A alíquota depende do anexo e do faturamento acumulado em 12 meses (RBT12).">?</button>
+          </span><span class="val" id="pjDas"></span></div>
+          <div class="line neg"><span class="lbl">INSS s/ pró-labore</span><span class="val" id="pjInss"></span></div>
+          <div class="line neg"><span class="lbl">IRRF s/ pró-labore</span><span class="val" id="pjIrrf"></span></div>
+          <div class="line neg" id="pjCppLine" style="display:none"><span class="lbl">CPP patronal</span><span class="val" id="pjCpp"></span></div>
+          <div class="line neg"><span class="lbl">Contabilidade</span><span class="val" id="pjContab"></span></div>
+          <div class="line neg"><span class="lbl">Custos administrativos</span><span class="val" id="pjAdmin"></span></div>
+          <div class="line"><span class="lbl">Pró-labore
+            <button class="tip" data-tip="O 'salário oficial' do sócio. Sobre ele incidem INSS e IRRF. Não é custo extra: faz parte do dinheiro que vai para o seu bolso.">?</button>
+          </span><span class="val" id="pjPl"></span></div>
+          <div class="line total"><span class="lbl">Líquido mensal</span><span class="val" id="pjLiqM"></span></div>
+          <div class="line"><span class="lbl">Líquido anual</span><span class="val" id="pjLiqA"></span></div>
+          <div class="line"><span class="lbl">Líquido ano 1 (− abertura)</span><span class="val" id="pjLiqA1"></span></div>
+        </div>
+      </div>
+    </details>
+
+  </section>
+
+  <!-- ======== DISCLAIMER ======== -->
+  <footer>
+    <p><strong>Aviso:</strong> simulação com base nas tabelas vigentes em jun/2026 (INSS, IRRF e Simples Nacional). Valores estimativos para fins de comparação — o enquadramento real depende do CNAE, da atividade e da forma de prestação do serviço. Consulte um contador antes de tomar qualquer decisão. A simulação não inclui benefícios CLT não monetários (FGTS acumulado, seguro-desemprego, estabilidade).</p>
+    <details>
+      <summary>O que a CLT te dá que a PJ não dá</summary>
+      <ul>
+        <li><strong>FGTS 8%</strong> — depósito mensal a favor do trabalhador, sacável em situações específicas.</li>
+        <li><strong>Multa de 40%</strong> sobre o saldo do FGTS em caso de demissão sem justa causa.</li>
+        <li><strong>Seguro-desemprego</strong> em caso de dispensa.</li>
+        <li><strong>Férias remuneradas garantidas</strong> com adicional de 1/3.</li>
+        <li><strong>INSS com contribuição maior</strong>, refletindo em aposentadoria e benefícios previdenciários mais altos.</li>
+      </ul>
+    </details>
+  </footer>
+</div>
+
+<!-- ======== CTA ======== -->
+<button id="cta-btn">Quero abrir minha PJ com quem entende →</button>
+<div id="lead-modal" role="dialog" aria-modal="true">
+  <div class="box">
+    <button class="close" id="modalClose" aria-label="Fechar">×</button>
+    <h3>Fale com a Madao Contabilidade</h3>
+    <p>Deixe seu nome e WhatsApp — um contador analisa seu caso e cuida da abertura da sua PJ do início ao fim.</p>
+    <div class="field"><label for="leadNome">Seu nome</label><input type="text" id="leadNome" placeholder="Nome completo"></div>
+    <div class="field"><label for="leadZap">Seu WhatsApp</label><input type="tel" id="leadZap" placeholder="(48) 9 9999-9999"></div>
+    <a class="btn" id="leadGo" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+   CONFIGURAÇÃO — edite aqui
+   ============================================================ */
+const CONFIG = {
+  whatsapp: '5548998129815',          // WhatsApp da Madao Contabilidade (wa.me)
+  empresaNome: 'Madao Contabilidade',
+};
+const SEGURO_DESEMPREGO_PARCELA = 2424.11;   // teto da parcela (editável)
+const C = {                            // paleta dos gráficos (identidade Madao)
+  blue:'#1f53eb', navy:'#0b1c4d', yellow:'#7d97ff', ok:'#16a05f', danger:'#e8423a',
+  warn:'#f59e0b', orange:'#fb8c3a', gray:'#c3cbe0', grid:'#eef0f7', soft:'#5d6b8a',
+};
+
+/* ============================================================
+   TABELAS LEGAIS — competência jun/2026
+   ============================================================ */
+const INSS_TETO = 8157.41;
+const INSS_FAIXAS = [               // progressivo por faixa
+  { de: 0,        ate: 1518.00,  aliq: 0.075 },
+  { de: 1518.00,  ate: 2793.88,  aliq: 0.09  },
+  { de: 2793.88,  ate: 4190.83,  aliq: 0.12  },
+  { de: 4190.83,  ate: 8157.41,  aliq: 0.14  },
+];
+const IRRF_TABELA = [               // base, alíquota, parcela a deduzir
+  { ate: 2428.80,  aliq: 0,     deduz: 0      },
+  { ate: 2826.65,  aliq: 0.075, deduz: 182.16 },
+  { ate: 3751.05,  aliq: 0.15,  deduz: 394.16 },
+  { ate: 4664.68,  aliq: 0.225, deduz: 675.49 },
+  { ate: Infinity, aliq: 0.275, deduz: 908.73 },
+];
+const IRRF_DESCONTO_SIMPLIFICADO = 607.20;
+const IRRF_DED_DEPENDENTE = 189.59;
+const ANEXO_III = [                 // RBT12 limite, nominal, parcela a deduzir
+  { ate: 180000,   aliq: 0.06,  deduz: 0      },
+  { ate: 360000,   aliq: 0.112, deduz: 9360   },
+  { ate: 720000,   aliq: 0.135, deduz: 17640  },
+  { ate: 1800000,  aliq: 0.16,  deduz: 35640  },
+  { ate: 3600000,  aliq: 0.21,  deduz: 125640 },
+  { ate: 4800000,  aliq: 0.33,  deduz: 648000 },
+];
+const ANEXO_V = [
+  { ate: 180000,   aliq: 0.155, deduz: 0      },
+  { ate: 360000,   aliq: 0.18,  deduz: 4500   },
+  { ate: 720000,   aliq: 0.195, deduz: 9900   },
+  { ate: 1800000,  aliq: 0.205, deduz: 17100  },
+  { ate: 3600000,  aliq: 0.23,  deduz: 62100  },
+  { ate: 4800000,  aliq: 0.305, deduz: 540000 },
+];
+
+/* ============================================================
+   MOTOR DE CÁLCULO
+   ============================================================ */
+function inssProgressivo(base) {
+  const b = Math.min(base, INSS_TETO);
+  let total = 0;
+  for (const f of INSS_FAIXAS) total += Math.max(0, Math.min(b, f.ate) - f.de) * f.aliq;
+  return total;
+}
+
+function irrfTabela(base) {
+  for (const f of IRRF_TABELA) {
+    if (base <= f.ate) return Math.max(0, base * f.aliq - f.deduz);
+  }
+  return 0;
+}
+
+// IRRF mensal: usa o maior entre deduções legais e desconto simplificado
+function irrfMensal(bruto, inss, dependentes, usarSimplificado, outras = 0, dedDep = IRRF_DED_DEPENDENTE) {
+  const dedLegais = inss + dependentes * dedDep + outras;
+  const ded = usarSimplificado ? Math.max(dedLegais, IRRF_DESCONTO_SIMPLIFICADO) : dedLegais;
+  return irrfTabela(Math.max(0, bruto - ded));
+}
+
+function calcCLT(p) {
+  const inss = inssProgressivo(p.salario);
+  const irrf = irrfMensal(p.salario, inss, p.dependentes, p.usarSimplificado, 0, p.dedDep);
+  const liquidoMensal = p.salario - inss - irrf;
+  const liquidoTerco = liquidoMensal / 3;                          // 1/3 de férias, mesmos descontos
+  const liquidoAnual = liquidoMensal * p.mesesCLT + liquidoTerco;  // 13 salários + terço de férias
+  const liquidoMensalMedio = liquidoAnual / 12;                    // 13º e férias diluídos no mês
+  // custo da empresa
+  const salarios13 = p.salario * p.mesesCLT;
+  const ferias13 = p.salario + p.salario / 3;
+  const fgts = (salarios13 + ferias13) * p.fgtsPct;
+  const inssPatronal = (salarios13 + ferias13) * p.patronalPct;
+  const custoAnual = salarios13 + ferias13 + fgts + inssPatronal;
+  return { inss, irrf, liquidoMensal, liquidoTerco, liquidoAnual, liquidoMensalMedio,
+           salarios13, ferias13, fgts, inssPatronal,
+           custoAnual, custoMensal: custoAnual / 12 };
+}
+
+function calcPJ(faturamentoMensal, p) {
+  const rbt12 = faturamentoMensal * 12;
+  // pró-labore mínimo para garantir o Fator R (recalculado a cada faturamento)
+  const proLaboreMin = (rbt12 * p.fatorRMin / 12) / (1 + p.cppPct);
+  const proLabore = p.plAuto ? Math.max(p.plManual || 0, proLaboreMin) : (p.plManual || 0);
+  const cppMensal = proLabore * p.cppPct;
+  const folha12m = (proLabore + cppMensal) * 12;
+  const fatorR = rbt12 > 0 ? folha12m / rbt12 : 0;
+  const anexoIII = fatorR >= p.fatorRMin - 1e-9;   // tolerância p/ erro binário na fronteira exata
+  const tabela = anexoIII ? ANEXO_III : ANEXO_V;
+  let faixa = tabela[tabela.length - 1];
+  for (const f of tabela) { if (rbt12 <= f.ate) { faixa = f; break; } }
+  const aliqEfetiva = rbt12 > 0 ? Math.max(0, (rbt12 * faixa.aliq - faixa.deduz) / rbt12) : 0;
+  const das = faturamentoMensal * aliqEfetiva;
+  const inssPl = inssProgressivo(proLabore);
+  const irrfPl = irrfMensal(proLabore, inssPl, p.dependentes, p.usarSimplificado, 0, p.dedDep);
+  const saidas = das + p.contab + p.admin + cppMensal + inssPl + irrfPl;
+  const liquidoMensal = faturamentoMensal - saidas;
+  const liquidoAnual = liquidoMensal * 12;
+  return { rbt12, proLabore, proLaboreMin, cppMensal, fatorR, anexoIII,
+           anexo: anexoIII ? 'Anexo III' : 'Anexo V',
+           aliqNominal: faixa.aliq, aliqEfetiva, das, inssPl, irrfPl, saidas,
+           liquidoMensal, liquidoAnual, liquidoAno1: liquidoAnual - p.abertura };
+}
+
+// varredura: menor faturamento (5k→50k, passo 50) cujo líquido PJ ≥ líquido CLT
+function findEquivalencia(liquidoCLT, p) {
+  for (let f = 5000; f <= 50000; f += 50) {
+    const pj = calcPJ(f, p);
+    if (pj.liquidoMensal >= liquidoCLT) return { faturamento: f, pj };
+  }
+  return null;
+}
+
+/* ============================================================
+   UI
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const fmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const fmt0 = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+const pct = v => (v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+
+function parseMoney(str) {
+  if (!str) return 0;
+  let s = String(str).replace(/[^\d.,]/g, '');
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');             // pt-BR: 1.500,50
+  else if (!/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\.(?=\d{3}(\.|$))/g, ''); // 1500.50 → decimal
+  else s = s.replace(/\./g, '');                                              // 1.500 / 1.500.000 → milhar
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+function readParams() {
+  return {
+    salario: parseMoney($('inSalario').value),
+    faturamento: parseMoney($('inFaturamento').value),
+    dependentes: parseInt($('inDependentes').value) || 0,
+    mesesCLT: parseFloat($('advMeses').value) || 13,
+    dedDep: parseFloat($('advDedDep').value) || 0,
+    diluir: $('advDiluir').checked,
+    fgtsPct: (parseFloat($('advFgts').value) || 0) / 100,
+    patronalPct: (parseFloat($('advPatronal').value) || 0) / 100,
+    contab: parseFloat($('advContab').value) || 0,
+    admin: parseFloat($('advAdmin').value) || 0,
+    abertura: parseFloat($('advAbertura').value) || 0,
+    fatorRMin: (parseFloat($('advFatorR').value) || 28) / 100,
+    cppPct: (parseFloat($('advCpp').value) || 0) / 100,
+    usarSimplificado: $('advSimplificado').checked,
+    plAuto: $('advPlAuto').checked,
+    plManual: parseFloat($('advPlManual').value) || 0,
+  };
+}
+
+const charts = {};          // instâncias Chart.js por canvas
+let lastState = null;       // para o texto do lead
+let hadResults = false;     // controla o scroll único até o resultado
+let chartDefaultsSet = false;
+
+function upChart(id, cfg) {
+  const card = $(id).closest('.card');
+  if (typeof Chart === 'undefined') {    // CDN com defer ainda carregando (ou offline): números seguem visíveis
+    if (card) card.classList.add('no-chart');
+    return;
+  }
+  if (card) card.classList.remove('no-chart');
+  if (!chartDefaultsSet) {
+    Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    Chart.defaults.font.size = 11; Chart.defaults.color = C.soft;
+    chartDefaultsSet = true;
+  }
+  if (charts[id]) { charts[id].data = cfg.data; charts[id].options = cfg.options; charts[id].update('none'); }
+  else charts[id] = new Chart($(id), cfg);
+}
+// quando o Chart.js (defer) terminar de carregar, redesenha os gráficos
+window.addEventListener('load', () => { if (lastState) render(); });
+
+function render() {
+  const p = readParams();
+  if (p.salario <= 0) {
+    $('results').classList.remove('show');
+    $('placeholder').style.display = 'block';
+    return;
+  }
+  $('placeholder').style.display = 'none';
+  $('results').classList.add('show');
+  if (!hadResults) {                     // primeira vez com resultado: leva o usuário até ele
+    hadResults = true;
+    setTimeout(() => $('results').scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+  }
+
+  const clt = calcCLT(p);
+  // alvo da comparação: média mensal anualizada (13º + férias diluídos) ou o mês isolado
+  const alvoCLT = p.diluir ? clt.liquidoMensalMedio : clt.liquidoMensal;
+  const alvoLabel = p.diluir ? 'média/mês CLT (13º + férias diluídos)' : 'líquido CLT no mês';
+  const eq = findEquivalencia(alvoCLT, p);
+  // faturamento ativo: digitado/slider, ou equivalência arredondada pra cima
+  const eqArredondado = eq ? Math.ceil(eq.faturamento / 50) * 50 : 50000;
+  const fat = p.faturamento > 0 ? p.faturamento : eqArredondado;
+  const pj = calcPJ(fat, p);
+  lastState = { p, clt, pj, eq, fat };
+
+  const diff = pj.liquidoMensal - alvoCLT;
+  const win = diff >= 0;
+
+  // --- KPIs ---
+  $('kClt').textContent = fmt0.format(alvoCLT);
+  $('kCltSub').textContent = p.diluir
+    ? `média/mês com 13º + férias · ${fmt0.format(clt.liquidoMensal)} no mês`
+    : `bruto ${fmt0.format(p.salario)} · ${pct(clt.liquidoMensal / p.salario)} líquido`;
+  $('kPj').textContent = fmt0.format(pj.liquidoMensal);
+  $('kPjSub').textContent = `faturando ${fmt0.format(fat)} · ${pj.anexo}`;
+  $('kDiffCard').classList.toggle('win', win);
+  $('kDiffCard').classList.toggle('lose', !win);
+  $('kDiff').textContent = (win ? '+' : '−') + fmt0.format(Math.abs(diff));
+  $('kDiffSub').textContent = win
+    ? `PJ paga ${pct(diff / alvoCLT)} a mais`
+    : `CLT vence nesse faturamento`;
+  $('kEq').textContent = eq ? fmt0.format(eq.faturamento) : '> R$ 50 mil';
+  $('kEqSub').textContent = eq ? `/mês como PJ pra empatar` : 'fora da faixa simulada';
+
+  // --- veredito ---
+  $('verdict').className = win ? 'win' : 'lose';
+  $('vIco').textContent = win ? '✓' : '!';
+  $('vTxt').textContent = win
+    ? `Como PJ faturando ${fmt0.format(fat)}/mês, sobra ${fmt.format(diff)} a mais por mês que a ${alvoLabel} (+${pct(diff / alvoCLT)}). No ano, são ${fmt.format(pj.liquidoAnual - clt.liquidoAnual)} a mais no bolso.`
+    : `Faturando ${fmt0.format(fat)}/mês como PJ você receberia ${fmt.format(-diff)} a menos que a ${alvoLabel}. ${eq ? `Para valer a pena, mire faturar a partir de ${fmt0.format(eq.faturamento)}/mês.` : 'Nesse cenário a CLT é melhor em toda a faixa simulada.'}`;
+
+  // --- slider ---
+  const slider = $('slider');
+  if (parseFloat(slider.value) !== fat) slider.value = fat;
+  $('sliderOut').textContent = fmt0.format(fat) + '/mês';
+  $('eqPill').innerHTML = eq
+    ? `Empate com a CLT${p.diluir ? ' (já contando 13º + férias)' : ''}: <b>${fmt0.format(eq.faturamento)}/mês</b> (${eq.pj.anexo}, Fator R ${pct(eq.pj.fatorR)})<button id="goEq">ir pro empate</button>`
+    : 'Nenhum faturamento até R$ 50 mil/mês empata com esse salário CLT.';
+  const goEq = $('goEq');
+  if (goEq) goEq.onclick = () => { $('inFaturamento').value = eq.faturamento.toLocaleString('pt-BR'); render(); };
+
+  // --- gráfico linha ---
+  const labels = [], dataPJ = [];
+  for (let f = 5000; f <= 50000; f += 250) { labels.push(f); dataPJ.push(calcPJ(f, p).liquidoMensal); }
+  const nearest = v => Math.min(50000, Math.max(5000, Math.round(v / 250) * 250));
+  const eqX = eq ? nearest(eq.faturamento) : null;
+  const curX = nearest(fat);
+  upChart('chartLine', {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: 'Líquido PJ', data: dataPJ, borderColor: C.blue, backgroundColor: 'rgba(56,72,221,.08)', fill: true, borderWidth: 2.5, pointRadius: 0, tension: .15 },
+      { label: p.diluir ? 'CLT (média c/ 13º + férias)' : 'Líquido CLT', data: labels.map(() => alvoCLT), borderColor: C.danger, borderDash: [6, 5], borderWidth: 2, pointRadius: 0, fill: false },
+      { label: 'Empate', data: labels.map(f => f === eqX ? calcPJ(f, p).liquidoMensal : null), borderColor: C.ok, backgroundColor: C.ok, pointRadius: 6, showLine: false },
+      { label: 'Você está aqui', data: labels.map(f => f === curX ? calcPJ(f, p).liquidoMensal : null), borderColor: C.navy, backgroundColor: C.yellow, pointRadius: 7, pointBorderWidth: 2.5, showLine: false },
+    ] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { boxWidth: 12, usePointStyle: true } },
+        tooltip: { callbacks: {
+          title: items => 'Faturamento ' + fmt0.format(items[0].label),
+          label: c => c.parsed.y == null ? null : c.dataset.label + ': ' + fmt.format(c.parsed.y),
+        } },
+      },
+      scales: {
+        x: { ticks: { maxTicksLimit: 7, callback: function (v) { return fmt0.format(this.getLabelForValue(v)); } }, grid: { display: false } },
+        y: { ticks: { callback: v => fmt0.format(v) }, grid: { color: C.grid } },
+      },
+    },
+  });
+
+  // --- donuts composição ---
+  const donutOpts = cut => ({
+    responsive: true, maintainAspectRatio: false, animation: false, cutout: cut,
+    plugins: {
+      legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true, font: { size: 9.5 }, padding: 6 } },
+      tooltip: { callbacks: { label: c => ` ${c.label}: ${fmt.format(c.parsed)} (${pct(c.parsed / c.dataset.data.reduce((a, b) => a + b, 0))})` } },
+    },
+  });
+  upChart('donutClt', {
+    type: 'doughnut',
+    data: { labels: ['Líquido', 'INSS', 'IRRF'],
+      datasets: [{ data: [clt.liquidoMensal, clt.inss, clt.irrf], backgroundColor: [C.blue, C.orange, C.danger], borderWidth: 2 }] },
+    options: donutOpts('62%'),
+  });
+  const pjParts = [
+    ['Líquido', Math.max(0, pj.liquidoMensal), C.blue],
+    ['DAS', pj.das, C.danger],
+    ['INSS p-l', pj.inssPl, C.orange],
+    ['IRRF p-l', pj.irrfPl, C.warn],
+    ['Contab.', p.contab, C.gray],
+    ['Admin.', p.admin, '#8e9bbd'],
+  ];
+  if (pj.cppMensal > 0) pjParts.push(['CPP', pj.cppMensal, '#b06ab3']);
+  upChart('donutPj', {
+    type: 'doughnut',
+    data: { labels: pjParts.map(x => x[0]),
+      datasets: [{ data: pjParts.map(x => x[1]), backgroundColor: pjParts.map(x => x[2]), borderWidth: 2 }] },
+    options: donutOpts('62%'),
+  });
+  $('dCltPct').textContent = pct(clt.liquidoMensal / p.salario);
+  $('dPjPct').textContent = pct(Math.max(0, pj.liquidoMensal) / fat);
+
+  // --- gauge fator R (semicírculo, limiar 28%) ---
+  const frCap = Math.min(pj.fatorR, 0.6);             // escala 0–60%
+  upChart('gauge', {
+    type: 'doughnut',
+    data: { labels: ['', '28%', ''], datasets: [
+      { // anel fino externo: marcador fixo dos 28%
+        data: [0.28, 0.008, 0.6 - 0.288],
+        backgroundColor: ['transparent', C.danger, 'transparent'],
+        borderWidth: 0, weight: .22,
+      },
+      { // anel principal: valor do Fator R
+        data: [frCap, Math.max(0, 0.6 - frCap)],
+        backgroundColor: [pj.anexoIII ? C.ok : C.danger, C.grid],
+        borderWidth: 0, weight: 1,
+      },
+    ] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      rotation: -90, circumference: 180, cutout: '72%',
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+    },
+  });
+  $('gVal').textContent = pct(pj.fatorR);
+  $('gAnexo').textContent = pj.anexo + ' · efetiva ' + pct(pj.aliqEfetiva);
+  $('gaugeCenter').className = 'gauge-center ' + (pj.anexoIII ? 'a3' : 'a5');
+  $('frNote').innerHTML = pj.anexoIII
+    ? `<span class="anexo-tag a3">Anexo III — imposto menor</span><br>Pró-labore de ${fmt0.format(pj.proLabore)} (≥ 28% do faturamento) garante o enquadramento mais barato do Simples — DAS a partir de 6%.`
+    : `<span class="anexo-tag a5">Anexo V — imposto maior</span><br>Fator R abaixo de 28%: DAS a partir de 15,5%. Subir o pró-labore para 28% do faturamento derruba o imposto pro Anexo III.`;
+
+  // --- barras anuais ---
+  upChart('chartYear', {
+    type: 'bar',
+    data: {
+      labels: ['CLT (13 salários + ⅓ férias)', 'PJ ano 1 (− abertura)', 'PJ ano 2 em diante'],
+      datasets: [{
+        data: [clt.liquidoAnual, pj.liquidoAno1, pj.liquidoAnual],
+        backgroundColor: [C.navy, C.blue, C.blue],
+        borderRadius: 8, barThickness: 34,
+      }],
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: false,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => ' ' + fmt.format(c.parsed.x) + ' líquidos/ano' } } },
+      scales: {
+        x: { ticks: { callback: v => fmt0.format(v) }, grid: { color: C.grid } },
+        y: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 } } },
+      },
+    },
+  });
+  $('yearCap').textContent = win
+    ? `Diferença de ${fmt.format(pj.liquidoAnual - clt.liquidoAnual)}/ano a favor da PJ (a partir do ano 2).`
+    : `Diferença de ${fmt.format(clt.liquidoAnual - pj.liquidoAnual)}/ano a favor da CLT nesse faturamento.`;
+
+  // --- visão da empresa ---
+  const fatRef = eq ? eq.faturamento : fat;
+  const ecoM = clt.custoMensal - fatRef;
+  $('empresaTexto').textContent =
+    `O custo real de um CLT de ${fmt0.format(p.salario)} é ${fmt.format(clt.custoMensal)}/mês ` +
+    `(${fmt.format(clt.custoAnual)}/ano, com 13º, férias + 1/3, FGTS e INSS patronal). ` +
+    `Contratando o mesmo profissional como PJ pelo valor de equivalência (${fmt0.format(fatRef)}/mês):`;
+  $('empCusto').textContent = fmt.format(clt.custoMensal);
+  $('empEco').textContent = fmt.format(ecoM);
+  $('empEcoAno').textContent = fmt.format(ecoM * 12);
+  const pjPctCusto = Math.min(1, fatRef / clt.custoMensal);
+  $('pctBarFill').style.width = (pjPctCusto * 100) + '%';
+  $('pctBarTxt').textContent = `PJ custa ${pct(pjPctCusto)} do custo CLT`;
+
+  // --- relatório de negociação ---
+  const piso = eq ? eq.faturamento : null;
+  const teto = clt.custoMensal;
+  if (piso && teto > piso) {
+    $('negCard').style.display = 'block';
+    const justo = Math.round((piso + teto) / 2 / 50) * 50;
+    const pjJusto = calcPJ(justo, p);
+    const ganhoJusto = pjJusto.liquidoMensal - alvoCLT;
+    const ecoJusto = (teto - justo) * 12;
+    $('negIntro').textContent =
+      `Virar PJ não é só trocar salário por nota fiscal: você abre mão de direitos que valem dinheiro, e a empresa corta encargos pesados. ` +
+      `Este relatório coloca tudo na mesa em R$ para a conversa ser justa: abaixo do piso você sai perdendo; até o teto, a empresa ainda economiza.`;
+    // o que o empregado deixa de receber
+    $('negFgts').textContent = `${fmt.format(clt.fgts / 12)}/mês · ${fmt.format(clt.fgts)}/ano`;
+    $('neg13').textContent = fmt.format(clt.liquidoMensal) + '/ano';
+    $('negFerias').textContent = fmt.format(clt.liquidoTerco) + '/ano';
+    $('negRecTotal').textContent = fmt.format(clt.fgts + clt.liquidoMensal + clt.liquidoTerco) + '/ano';
+    $('negMulta').textContent = '~' + fmt.format(clt.fgts * 0.4) + '/ano trabalhado';
+    $('negSeguro').textContent = 'até ~' + fmt0.format(SEGURO_DESEMPREGO_PARCELA * 5) + ' se demitido';
+    $('negAviso').textContent = '≥ ' + fmt0.format(p.salario) + ' + 3 dias/ano';
+    $('negInssBase').textContent = `${fmt0.format(Math.min(p.salario, INSS_TETO))} → ${fmt0.format(pj.proLabore)}`;
+    // o que a empresa ganha
+    $('negCustoClt').textContent = fmt.format(teto) + '/mês';
+    $('negPatronal').textContent = '− ' + fmt.format(clt.inssPatronal) + '/ano';
+    $('negFgtsEmp').textContent = '− ' + fmt.format(clt.fgts) + '/ano';
+    $('negProv').textContent = '− ' + fmt.format(p.salario + clt.ferias13) + '/ano';
+    $('negPiso').textContent = fmt0.format(piso) + '/mês';
+    $('negEcoEmp').textContent = fmt.format((teto - piso) * 12);
+    // zona de negociação
+    const pos = v => ((v - piso) / (teto - piso) * 100).toFixed(1) + '%';
+    $('negMkPiso').style.left = '0%';
+    $('negMkPiso').dataset.l = `Piso ${fmt0.format(piso)} — você só empata`;
+    $('negMkJusto').style.left = pos(justo);
+    $('negMkJusto').dataset.l = `Justo ${fmt0.format(justo)} — divide o ganho`;
+    $('negMkTeto').style.left = '100%';
+    $('negMkTeto').dataset.l = `Teto ${fmt0.format(Math.round(teto))} — custo CLT`;
+    // argumentos prontos
+    $('negArgs').innerHTML =
+      `<li>“Meu custo real como CLT não é ${fmt0.format(p.salario)} — com encargos, é <b>${fmt.format(teto)}/mês</b> (${fmt.format(clt.custoAnual)}/ano).”</li>` +
+      `<li>“No piso de <b>${fmt0.format(piso)}/mês</b> eu apenas empato meu líquido — e ainda abro mão de FGTS, multa de 40%, seguro-desemprego e de ${fmt.format(clt.fgts + clt.liquidoMensal + clt.liquidoTerco)}/ano em direitos recorrentes. Não é razoável eu assumir esse risco de graça.”</li>` +
+      `<li>“Em <b>${fmt0.format(justo)}/mês</b> a conta fecha pros dois lados: eu levo ${fmt.format(ganhoJusto)}/mês a mais que na CLT pelo risco que assumo, e a empresa ainda economiza <b>${fmt.format(ecoJusto)}/ano</b>.”</li>`;
+  } else {
+    $('negCard').style.display = 'none';
+  }
+
+  // --- memória de cálculo ---
+  $('cltBruto').textContent = fmt.format(p.salario);
+  $('cltInss').textContent = '− ' + fmt.format(clt.inss);
+  $('cltIrrf').textContent = '− ' + fmt.format(clt.irrf);
+  $('cltLiqM').textContent = fmt.format(clt.liquidoMensal);
+  $('cltTerco').textContent = fmt.format(clt.liquidoTerco);
+  $('cltLiqA').textContent = fmt.format(clt.liquidoAnual);
+  $('cltMedia').textContent = fmt.format(clt.liquidoMensalMedio);
+  $('pjFat').textContent = fmt.format(fat);
+  $('pjDas').textContent = `− ${fmt.format(pj.das)} (${pct(pj.aliqEfetiva)})`;
+  $('pjInss').textContent = '− ' + fmt.format(pj.inssPl);
+  $('pjIrrf').textContent = '− ' + fmt.format(pj.irrfPl);
+  $('pjCppLine').style.display = pj.cppMensal > 0 ? 'flex' : 'none';
+  $('pjCpp').textContent = '− ' + fmt.format(pj.cppMensal);
+  $('pjContab').textContent = '− ' + fmt.format(p.contab);
+  $('pjAdmin').textContent = '− ' + fmt.format(p.admin);
+  $('pjPl').textContent = fmt.format(pj.proLabore);
+  $('pjLiqM').textContent = fmt.format(pj.liquidoMensal);
+  $('pjLiqA').textContent = fmt.format(pj.liquidoAnual);
+  $('pjLiqA1').textContent = fmt.format(pj.liquidoAno1);
+
+  syncChips(p.salario);
+  updateLeadLink();
+}
+
+/* --- chips de salário --- */
+function syncChips(salario) {
+  document.querySelectorAll('#chips button').forEach(b =>
+    b.classList.toggle('on', parseFloat(b.dataset.v) === salario));
+}
+document.querySelectorAll('#chips button').forEach(b => b.addEventListener('click', () => {
+  $('inSalario').value = parseFloat(b.dataset.v).toLocaleString('pt-BR');
+  $('inFaturamento').value = '';     // volta pro modo automático (equivalência)
+  render();
+}));
+
+/* --- lead / CTA --- */
+function updateLeadLink() {
+  const nome = $('leadNome').value.trim();
+  const zap = $('leadZap').value.trim();
+  let msg = `Olá! Vim do Simulador PJ x CLT da ${CONFIG.empresaNome}.`;
+  if (nome) msg += ` Meu nome é ${nome}.`;
+  if (zap) msg += ` Meu WhatsApp: ${zap}.`;
+  if (lastState) {
+    msg += ` Tenho salário CLT de ${fmt0.format(lastState.p.salario)}` +
+      (lastState.eq ? ` e vi que faturando ${fmt0.format(lastState.eq.faturamento)}/mês como PJ eu já empato o líquido.` : '.') +
+      ' Quero ajuda para abrir minha PJ.';
+  }
+  $('leadGo').href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
+}
+
+/* --- tooltips tap-friendly --- */
+document.addEventListener('click', e => {
+  const tip = e.target.closest('.tip');
+  document.querySelectorAll('.tip.show').forEach(t => { if (t !== tip) t.classList.remove('show'); });
+  if (tip) {
+    tip.classList.toggle('show');
+    if (tip.classList.contains('show')) {        // balão não pode estourar a lateral da tela
+      const r = tip.getBoundingClientRect(), half = Math.min(235, window.innerWidth * .8) / 2;
+      tip.classList.toggle('edge-l', r.left + r.width / 2 < half + 10);
+      tip.classList.toggle('edge-r', window.innerWidth - (r.left + r.width / 2) < half + 10);
+    }
+    e.preventDefault();
+  }
+});
+
+/* --- eventos --- */
+let debounceT = null;
+function scheduleRender() { clearTimeout(debounceT); debounceT = setTimeout(render, 300); }
+
+['inSalario', 'inFaturamento', 'inDependentes', 'advMeses', 'advFgts', 'advPatronal', 'advDedDep',
+ 'advContab', 'advAdmin', 'advAbertura', 'advFatorR', 'advCpp', 'advPlManual']
+  .forEach(id => $(id).addEventListener('input', scheduleRender));
+['advSimplificado', 'advPlAuto', 'advDiluir'].forEach(id => $(id).addEventListener('change', () => {
+  $('plManualWrap').style.display = $('advPlAuto').checked ? 'none' : 'block';
+  scheduleRender();
+}));
+
+$('slider').addEventListener('input', () => {
+  $('inFaturamento').value = parseInt($('slider').value).toLocaleString('pt-BR');
+  render();                                   // slider = tempo real, sem debounce
+});
+
+$('cta-btn').addEventListener('click', () => { $('lead-modal').classList.add('open'); updateLeadLink(); });
+$('modalClose').addEventListener('click', () => $('lead-modal').classList.remove('open'));
+$('lead-modal').addEventListener('click', e => { if (e.target === $('lead-modal')) $('lead-modal').classList.remove('open'); });
+$('leadNome').addEventListener('input', updateLeadLink);
+$('leadZap').addEventListener('input', updateLeadLink);
+$('negPrint').addEventListener('click', () => {
+  document.body.classList.add('print-report');
+  window.print();
+});
+window.addEventListener('afterprint', () => document.body.classList.remove('print-report'));
+$('negData').textContent = new Date().toLocaleDateString('pt-BR');
+
+/* ============================================================
+   AUTOTESTE — cenário de referência (console)
+   salário 13.000, 0 dependentes, defaults
+   ============================================================ */
+(function selfTest() {
+  const p = { salario: 13000, dependentes: 0, mesesCLT: 13, fgtsPct: .08, patronalPct: .20,
+              contab: 300, admin: 150, abertura: 600, fatorRMin: .28, cppPct: 0,
+              usarSimplificado: true, plAuto: true, plManual: 0 };
+  const clt = calcCLT(p);
+  const pj15 = calcPJ(15000, p);
+  const eq = findEquivalencia(clt.liquidoMensal, p);
+  const ok = (label, got, want, tol = 1) => {
+    const pass = Math.abs(got - want) <= tol;
+    console[pass ? 'log' : 'warn'](`[selfTest] ${label}: ${got.toFixed(2)} (esperado ${want}) ${pass ? '✓' : '✗'}`);
+  };
+  ok('Líquido CLT mensal', clt.liquidoMensal, 9643.80);
+  ok('Custo anual empresa', clt.custoAnual, 238506.67);
+  ok('PJ 15k líquido mensal', pj15.liquidoMensal, 13107.64);
+  ok('PJ 15k pró-labore', pj15.proLabore, 4200);
+  // A equivalência assume pró-labore mínimo recalculado a cada faturamento (28% do RBT12,
+  // regra do Fator R) — por isso o ponto de empate deste cenário fica em R$ 11.050.
+  ok('Equivalência mês a mês (PL recalculado)', eq.faturamento, 11050, 0);
+  ok('Líquido na equivalência', eq.pj.liquidoMensal, 9667.96);
+  // Comparação anualizada (13º + 1/3 de férias diluídos no mês) — padrão do app
+  ok('CLT 1/3 férias líquido', clt.liquidoTerco, 3214.60);
+  ok('CLT média mensal anualizada', clt.liquidoMensalMedio, 10715.33);
+  const eqA = findEquivalencia(clt.liquidoMensalMedio, p);
+  ok('Equivalência anualizada', eqA.faturamento, 12250, 0);
+  ok('Líquido PJ na equivalência anualizada', eqA.pj.liquidoMensal, 10730.44);
+})();
+
+render();
+</script>
+</body>
+</html>
