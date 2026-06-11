@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulador PJ x CLT — Madao Contabilidade</title>
+<title>Simulador PJ (Fator R Flutuante) x CLT — Madao Contabilidade</title>
 <meta name="description" content="Compare seu salário CLT com abrir uma PJ no Simples Nacional (Fator R). Descubra quanto precisa faturar para ganhar mais como PJ.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -264,7 +264,7 @@ footer li{margin-bottom:4px}
   <a class="tz" href="https://wa.me/5548998129815">Falar no WhatsApp</a>
 </div></div>
 <header>
-  <h1>Simulador <em>PJ × CLT</em></h1>
+  <h1>Simulador <em>PJ (Fator R Flutuante)</em> × CLT</h1>
   <p>Descubra em segundos quanto você precisa faturar como PJ no Simples Nacional para ganhar mais do que na CLT — e quanto a empresa economiza.</p>
 </header>
 
@@ -298,6 +298,19 @@ footer li{margin-bottom:4px}
     </div>
 
     <details class="adv">
+      <summary>Benefícios do funcionário na CLT (VA, saúde, academia…)</summary>
+      <div class="grid">
+        <div class="field"><label>Vale Alimentação (R$/mês)</label><input type="number" id="benVA" value="0" step="50" min="0"></div>
+        <div class="field"><label>Plano de Saúde (R$/mês)</label><input type="number" id="benSaude" value="0" step="50" min="0"></div>
+        <div class="field"><label>Plano Dentista (R$/mês)</label><input type="number" id="benDente" value="0" step="10" min="0"></div>
+        <div class="field"><label>Plano Academia (R$/mês)</label><input type="number" id="benAcad" value="0" step="10" min="0"></div>
+        <div class="field"><label>Auxílio Creche (R$/mês)</label><input type="number" id="benCreche" value="0" step="50" min="0"></div>
+        <div class="field"><label>Outros Auxílios (R$/mês)</label><input type="number" id="benOutros" value="0" step="50" min="0"></div>
+      </div>
+      <p style="padding:0 16px 14px;font-size:.74rem;color:var(--text-soft)">Benefícios somam no que você recebe como CLT (o PJ precisa cobrir isso também) e no custo da empresa.</p>
+    </details>
+
+    <details class="adv">
       <summary>Ajustes avançados (contabilidade, encargos, pró-labore…)</summary>
       <div class="grid">
         <div class="field"><label>Meses CLT no ano (com 13º)</label><input type="number" id="advMeses" value="13" step="1" min="12" max="14"></div>
@@ -305,9 +318,18 @@ footer li{margin-bottom:4px}
         <div class="field"><label>INSS patronal + terceiros (%)</label><input type="number" id="advPatronal" value="20" step="0.5" min="0"></div>
         <div class="field"><label>Dedução por dependente IRRF (R$)</label><input type="number" id="advDedDep" value="189.59" step="0.01" min="0"></div>
         <div class="field"><label>Contabilidade mensal PJ (R$)</label><input type="number" id="advContab" value="300" step="10" min="0"></div>
-        <div class="field"><label>Custos admin. mensais PJ (R$)
-          <button class="tip" data-tip="Banco PJ, certificado digital, softwares e outras despesas fixas da empresa.">?</button>
+        <div class="field"><label>Despesas administrativas (R$/mês)
+          <button class="tip" data-tip="Banco PJ, softwares e outras despesas fixas mensais da empresa.">?</button>
         </label><input type="number" id="advAdmin" value="150" step="10" min="0"></div>
+        <div class="field"><label>Energia (R$/mês)</label><input type="number" id="advEnergia" value="0" step="10" min="0"></div>
+        <div class="field"><label>Certificado Digital (R$/ano)
+          <button class="tip" data-tip="Custo anual do certificado digital, diluído entre os 12 meses no cálculo.">?</button>
+        </label><input type="number" id="advCert" value="190" step="10" min="0"></div>
+        <div class="field"><label>Alvará de Funcionamento (R$/ano)
+          <button class="tip" data-tip="Custo anual do alvará, diluído entre os 12 meses no cálculo.">?</button>
+        </label><input type="number" id="advAlvara" value="250" step="10" min="0"></div>
+        <div class="field"><label>Manutenção de aparelhos (R$/mês)</label><input type="number" id="advManut" value="100" step="10" min="0"></div>
+        <div class="field"><label>Demais despesas não contabilizadas (R$/mês)</label><input type="number" id="advDemais" value="0" step="10" min="0"></div>
         <div class="field"><label>Custo de abertura da PJ (R$)
           <button class="tip" data-tip="Taxas de abertura/alteração do CNPJ. Descontado apenas no resultado do 1º ano.">?</button>
         </label><input type="number" id="advAbertura" value="600" step="50" min="0"></div>
@@ -461,6 +483,35 @@ footer li{margin-bottom:4px}
       </div>
       <h2>Relatório de negociação — leve pra conversa</h2>
       <p style="font-size:.88rem;color:var(--text-soft)" id="negIntro"></p>
+
+      <h3 style="font-size:.78rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);margin:18px 0 10px">Lado a lado — situação simulada</h3>
+      <div class="compare" style="padding:0;margin:0 0 6px">
+        <div class="col">
+          <h3>Custos CLT</h3>
+          <div class="line"><span class="lbl">Salário bruto</span><span class="val" id="llBruto"></span></div>
+          <div class="line"><span class="lbl">Benefícios</span><span class="val" id="llBen"></span></div>
+          <div class="line neg"><span class="lbl">Descontos em folha (INSS + IRRF)</span><span class="val" id="llDesc"></span></div>
+          <div class="line total"><span class="lbl">Total líquido mensal</span><span class="val" id="llTotM"></span></div>
+          <div class="line total"><span class="lbl">Total líquido anual</span><span class="val" id="llTotA"></span></div>
+        </div>
+        <div class="col">
+          <h3>Custos PJ (Fator R Flutuante)</h3>
+          <div class="line"><span class="lbl">Receita bruta</span><span class="val" id="llFat"></span></div>
+          <div class="line"><span class="lbl">Pró-labore (salário do empresário p/ atingir o Fator R)</span><span class="val" id="llPl"></span></div>
+          <div class="line neg"><span class="lbl">Imposto (DAS + INSS/IRRF do pró-labore)</span><span class="val" id="llImp"></span></div>
+          <div class="line" style="border-bottom:none;padding-bottom:0"><span class="lbl" style="font-weight:700;color:var(--navy)">Deduções e custos administrativos</span></div>
+          <div class="line neg"><span class="lbl">Contabilidade</span><span class="val" id="llC1"></span></div>
+          <div class="line neg"><span class="lbl">Energia</span><span class="val" id="llC2"></span></div>
+          <div class="line neg"><span class="lbl">Despesas administrativas</span><span class="val" id="llC3"></span></div>
+          <div class="line neg"><span class="lbl">Certificado digital (anual ÷ 12)</span><span class="val" id="llC4"></span></div>
+          <div class="line neg"><span class="lbl">Alvará de funcionamento (anual ÷ 12)</span><span class="val" id="llC5"></span></div>
+          <div class="line neg"><span class="lbl">Manutenção de aparelhos</span><span class="val" id="llC6"></span></div>
+          <div class="line neg"><span class="lbl">Demais despesas não contabilizadas</span><span class="val" id="llC7"></span></div>
+          <div class="line total"><span class="lbl">Total líquido mensal</span><span class="val" id="llPjM"></span></div>
+          <div class="line total"><span class="lbl">Total líquido anual</span><span class="val" id="llPjA"></span></div>
+        </div>
+      </div>
+
       <div class="neg-grid">
         <div class="neg-col">
           <h3>O que você deixa de receber como PJ</h3>
@@ -468,6 +519,7 @@ footer li{margin-bottom:4px}
             <button class="tip" data-tip="Depósito mensal feito pela empresa numa conta em seu nome. Como PJ, esse dinheiro simplesmente deixa de existir — ele precisa estar embutido no valor que você cobra.">?</button>
           </span><span class="val" id="negFgts"></span></div>
           <div class="line"><span class="lbl">13º salário (líquido)</span><span class="val" id="neg13"></span></div>
+          <div class="line"><span class="lbl">Benefícios (VA, saúde, academia…)</span><span class="val" id="negBen"></span></div>
           <div class="line"><span class="lbl">⅓ de férias (líquido)</span><span class="val" id="negFerias"></span></div>
           <div class="line total"><span class="lbl">Total recorrente que some /ano</span><span class="val" id="negRecTotal"></span></div>
           <h4 class="neg-sub">Proteções que você perde (valor potencial)</h4>
@@ -496,7 +548,8 @@ footer li{margin-bottom:4px}
       </div>
       <ul class="neg-args" id="negArgs"></ul>
       <button class="mini-cta" id="negPrint">Imprimir / salvar em PDF →</button>
-      <div class="neg-rodape">Gerado pelo Simulador PJ × CLT · Madao Contabilidade · (48) 99812-9815 · <span id="negData"></span> · valores estimados com tabelas de jun/2026 — confirme com um contador.</div>
+      <p id="negExplica" style="margin-top:16px;padding:14px 16px;background:var(--bg);border-radius:11px;font-size:.86rem;line-height:1.65"></p>
+      <div class="neg-rodape">Gerado pelo Simulador PJ (Fator R Flutuante) × CLT · Madao Contabilidade · (48) 99812-9815 · <span id="negData"></span> · valores estimados com tabelas de jun/2026 — confirme com um contador.</div>
     </div>
 
     <!-- memória de cálculo -->
@@ -506,6 +559,7 @@ footer li{margin-bottom:4px}
         <div class="col">
           <h3>CLT <span class="tag">carteira assinada</span></h3>
           <div class="line"><span class="lbl">Salário bruto</span><span class="val" id="cltBruto"></span></div>
+          <div class="line"><span class="lbl">Benefícios (VA, saúde…)</span><span class="val" id="cltBen"></span></div>
           <div class="line neg"><span class="lbl">INSS
             <button class="tip" data-tip="Contribuição previdenciária do empregado, calculada por faixas progressivas até o teto de R$ 8.157,41.">?</button>
           </span><span class="val" id="cltInss"></span></div>
@@ -529,7 +583,12 @@ footer li{margin-bottom:4px}
           <div class="line neg"><span class="lbl">IRRF s/ pró-labore</span><span class="val" id="pjIrrf"></span></div>
           <div class="line neg" id="pjCppLine" style="display:none"><span class="lbl">CPP patronal</span><span class="val" id="pjCpp"></span></div>
           <div class="line neg"><span class="lbl">Contabilidade</span><span class="val" id="pjContab"></span></div>
-          <div class="line neg"><span class="lbl">Custos administrativos</span><span class="val" id="pjAdmin"></span></div>
+          <div class="line neg"><span class="lbl">Energia</span><span class="val" id="pjEnergia"></span></div>
+          <div class="line neg"><span class="lbl">Despesas administrativas</span><span class="val" id="pjAdmin"></span></div>
+          <div class="line neg"><span class="lbl">Certificado digital (R$/ano ÷ 12)</span><span class="val" id="pjCert"></span></div>
+          <div class="line neg"><span class="lbl">Alvará (R$/ano ÷ 12)</span><span class="val" id="pjAlvara"></span></div>
+          <div class="line neg"><span class="lbl">Manutenção de aparelhos</span><span class="val" id="pjManut"></span></div>
+          <div class="line neg"><span class="lbl">Demais despesas</span><span class="val" id="pjDemais"></span></div>
           <div class="line"><span class="lbl">Pró-labore
             <button class="tip" data-tip="O 'salário oficial' do sócio. Sobre ele incidem INSS e IRRF. Não é custo extra: faz parte do dinheiro que vai para o seu bolso.">?</button>
           </span><span class="val" id="pjPl"></span></div>
@@ -650,16 +709,17 @@ function calcCLT(p) {
   const inss = inssProgressivo(p.salario);
   const irrf = irrfMensal(p.salario, inss, p.dependentes, p.usarSimplificado, 0, p.dedDep);
   const liquidoMensal = p.salario - inss - irrf;
+  const beneficios = p.beneficios || 0;                            // VA, saúde, academia… (pacote CLT)
   const liquidoTerco = liquidoMensal / 3;                          // 1/3 de férias, mesmos descontos
-  const liquidoAnual = liquidoMensal * p.mesesCLT + liquidoTerco;  // 13 salários + terço de férias
-  const liquidoMensalMedio = liquidoAnual / 12;                    // 13º e férias diluídos no mês
+  const liquidoAnual = liquidoMensal * p.mesesCLT + liquidoTerco + beneficios * 12;  // 13 sal. + terço + benefícios
+  const liquidoMensalMedio = liquidoAnual / 12;                    // tudo diluído no mês
   // custo da empresa
   const salarios13 = p.salario * p.mesesCLT;
   const ferias13 = p.salario + p.salario / 3;
   const fgts = (salarios13 + ferias13) * p.fgtsPct;
   const inssPatronal = (salarios13 + ferias13) * p.patronalPct;
-  const custoAnual = salarios13 + ferias13 + fgts + inssPatronal;
-  return { inss, irrf, liquidoMensal, liquidoTerco, liquidoAnual, liquidoMensalMedio,
+  const custoAnual = salarios13 + ferias13 + fgts + inssPatronal + (p.beneficios || 0) * 12;
+  return { inss, irrf, beneficios, liquidoMensal, liquidoTerco, liquidoAnual, liquidoMensalMedio,
            salarios13, ferias13, fgts, inssPatronal,
            custoAnual, custoMensal: custoAnual / 12 };
 }
@@ -680,10 +740,12 @@ function calcPJ(faturamentoMensal, p) {
   const das = faturamentoMensal * aliqEfetiva;
   const inssPl = inssProgressivo(proLabore);
   const irrfPl = irrfMensal(proLabore, inssPl, p.dependentes, p.usarSimplificado, 0, p.dedDep);
-  const saidas = das + p.contab + p.admin + cppMensal + inssPl + irrfPl;
+  const custosFixos = p.contab + (p.energia || 0) + p.admin + (p.demais || 0) + (p.manut || 0)
+                    + ((p.cert || 0) + (p.alvara || 0)) / 12;     // anuais diluídos no mês
+  const saidas = das + custosFixos + cppMensal + inssPl + irrfPl;
   const liquidoMensal = faturamentoMensal - saidas;
   const liquidoAnual = liquidoMensal * 12;
-  return { rbt12, proLabore, proLaboreMin, cppMensal, fatorR, anexoIII,
+  return { rbt12, proLabore, proLaboreMin, cppMensal, fatorR, anexoIII, custosFixos,
            anexo: anexoIII ? 'Anexo III' : 'Anexo V',
            aliqNominal: faixa.aliq, aliqEfetiva, das, inssPl, irrfPl, saidas,
            liquidoMensal, liquidoAnual, liquidoAno1: liquidoAnual - p.abertura };
@@ -728,6 +790,13 @@ function readParams() {
     patronalPct: (parseFloat($('advPatronal').value) || 0) / 100,
     contab: parseFloat($('advContab').value) || 0,
     admin: parseFloat($('advAdmin').value) || 0,
+    energia: parseFloat($('advEnergia').value) || 0,
+    cert: parseFloat($('advCert').value) || 0,
+    alvara: parseFloat($('advAlvara').value) || 0,
+    manut: parseFloat($('advManut').value) || 0,
+    demais: parseFloat($('advDemais').value) || 0,
+    beneficios: ['benVA','benSaude','benDente','benAcad','benCreche','benOutros']
+      .reduce((t, id) => t + (parseFloat($(id).value) || 0), 0),
     abertura: parseFloat($('advAbertura').value) || 0,
     fatorRMin: (parseFloat($('advFatorR').value) || 28) / 100,
     cppPct: (parseFloat($('advCpp').value) || 0) / 100,
@@ -776,7 +845,7 @@ function render() {
 
   const clt = calcCLT(p);
   // alvo da comparação: média mensal anualizada (13º + férias diluídos) ou o mês isolado
-  const alvoCLT = p.diluir ? clt.liquidoMensalMedio : clt.liquidoMensal;
+  const alvoCLT = p.diluir ? clt.liquidoMensalMedio : clt.liquidoMensal + clt.beneficios;
   const alvoLabel = p.diluir ? 'média/mês CLT (13º + férias diluídos)' : 'líquido CLT no mês';
   const eq = findEquivalencia(alvoCLT, p);
   // faturamento ativo: digitado/slider, ou equivalência arredondada pra cima
@@ -871,8 +940,7 @@ function render() {
     ['DAS', pj.das, C.danger],
     ['INSS p-l', pj.inssPl, C.orange],
     ['IRRF p-l', pj.irrfPl, C.warn],
-    ['Contab.', p.contab, C.gray],
-    ['Admin.', p.admin, '#8e9bbd'],
+    ['Custos fixos', pj.custosFixos, C.gray],
   ];
   if (pj.cppMensal > 0) pjParts.push(['CPP', pj.cppMensal, '#b06ab3']);
   upChart('donutPj', {
@@ -961,6 +1029,33 @@ function render() {
     const pjJusto = calcPJ(justo, p);
     const ganhoJusto = pjJusto.liquidoMensal - alvoCLT;
     const ecoJusto = (teto - justo) * 12;
+    // lado a lado — situação simulada
+    $('llBruto').textContent = fmt.format(p.salario);
+    $('llBen').textContent = clt.beneficios > 0 ? '+ ' + fmt.format(clt.beneficios) : 'R$ 0,00';
+    $('llDesc').textContent = '− ' + fmt.format(clt.inss + clt.irrf);
+    $('llTotM').textContent = fmt.format(clt.liquidoMensal + clt.beneficios);
+    $('llTotA').textContent = fmt.format(clt.liquidoAnual);
+    $('llFat').textContent = fmt.format(fat);
+    $('llPl').textContent = fmt.format(pj.proLabore);
+    $('llImp').textContent = '− ' + fmt.format(pj.das + pj.inssPl + pj.irrfPl + pj.cppMensal);
+    $('llC1').textContent = '− ' + fmt.format(p.contab);
+    $('llC2').textContent = '− ' + fmt.format(p.energia);
+    $('llC3').textContent = '− ' + fmt.format(p.admin);
+    $('llC4').textContent = '− ' + fmt.format(p.cert / 12);
+    $('llC5').textContent = '− ' + fmt.format(p.alvara / 12);
+    $('llC6').textContent = '− ' + fmt.format(p.manut);
+    $('llC7').textContent = '− ' + fmt.format(p.demais);
+    $('llPjM').textContent = fmt.format(pj.liquidoMensal);
+    $('llPjA').textContent = fmt.format(pj.liquidoAnual);
+    // explicação em linguagem leiga
+    const ttCLT = clt.liquidoMensal + clt.beneficios;
+    $('negExplica').innerHTML =
+      `<b>Em palavras simples:</b> hoje, como CLT, sobra pra você ${fmt.format(ttCLT)} por mês ` +
+      `(salário líquido${clt.beneficios > 0 ? ' + benefícios' : ''}) — e no ano, contando 13º e férias, ${fmt.format(clt.liquidoAnual)}. ` +
+      `Como PJ faturando ${fmt0.format(fat)} por mês, depois de pagar o imposto do Simples (calculado com o pró-labore no ponto do Fator R, que garante a alíquota menor) ` +
+      `e os custos de manter a empresa aberta (contabilidade, certificado, alvará etc.), sobrariam ${fmt.format(pj.liquidoMensal)} por mês — ${fmt.format(pj.liquidoAnual)} no ano. ` +
+      `${pj.liquidoMensal >= alvoCLT ? 'Ou seja: nesse faturamento, a PJ deixa mais dinheiro no seu bolso que a CLT.' : `Para a PJ valer a pena, o faturamento precisa ser de pelo menos ${eq ? fmt0.format(eq.faturamento) : '—'} por mês.`} ` +
+      `Lembre que como PJ você abre mão de proteções da CLT (FGTS, multa, seguro-desemprego) — é por isso que o valor justo a cobrar fica entre o piso e o teto mostrados acima.`;
     $('negIntro').textContent =
       `Virar PJ não é só trocar salário por nota fiscal: você abre mão de direitos que valem dinheiro, e a empresa corta encargos pesados. ` +
       `Este relatório coloca tudo na mesa em R$ para a conversa ser justa: abaixo do piso você sai perdendo; até o teto, a empresa ainda economiza.`;
@@ -968,7 +1063,8 @@ function render() {
     $('negFgts').textContent = `${fmt.format(clt.fgts / 12)}/mês · ${fmt.format(clt.fgts)}/ano`;
     $('neg13').textContent = fmt.format(clt.liquidoMensal) + '/ano';
     $('negFerias').textContent = fmt.format(clt.liquidoTerco) + '/ano';
-    $('negRecTotal').textContent = fmt.format(clt.fgts + clt.liquidoMensal + clt.liquidoTerco) + '/ano';
+    $('negBen').textContent = fmt.format(clt.beneficios * 12) + '/ano';
+    $('negRecTotal').textContent = fmt.format(clt.fgts + clt.liquidoMensal + clt.liquidoTerco + clt.beneficios * 12) + '/ano';
     $('negMulta').textContent = '~' + fmt.format(clt.fgts * 0.4) + '/ano trabalhado';
     $('negSeguro').textContent = 'até ~' + fmt0.format(SEGURO_DESEMPREGO_PARCELA * 5) + ' se demitido';
     $('negAviso').textContent = '≥ ' + fmt0.format(p.salario) + ' + 3 dias/ano';
@@ -991,7 +1087,7 @@ function render() {
     // argumentos prontos
     $('negArgs').innerHTML =
       `<li>“Meu custo real como CLT não é ${fmt0.format(p.salario)} — com encargos, é <b>${fmt.format(teto)}/mês</b> (${fmt.format(clt.custoAnual)}/ano).”</li>` +
-      `<li>“No piso de <b>${fmt0.format(piso)}/mês</b> eu apenas empato meu líquido — e ainda abro mão de FGTS, multa de 40%, seguro-desemprego e de ${fmt.format(clt.fgts + clt.liquidoMensal + clt.liquidoTerco)}/ano em direitos recorrentes. Não é razoável eu assumir esse risco de graça.”</li>` +
+      `<li>“No piso de <b>${fmt0.format(piso)}/mês</b> eu apenas empato meu líquido — e ainda abro mão de FGTS, multa de 40%, seguro-desemprego e de ${fmt.format(clt.fgts + clt.liquidoMensal + clt.liquidoTerco + clt.beneficios * 12)}/ano em direitos e benefícios recorrentes. Não é razoável eu assumir esse risco de graça.”</li>` +
       `<li>“Em <b>${fmt0.format(justo)}/mês</b> a conta fecha pros dois lados: eu levo ${fmt.format(ganhoJusto)}/mês a mais que na CLT pelo risco que assumo, e a empresa ainda economiza <b>${fmt.format(ecoJusto)}/ano</b>.”</li>`;
   } else {
     $('negCard').style.display = 'none';
@@ -999,6 +1095,7 @@ function render() {
 
   // --- memória de cálculo ---
   $('cltBruto').textContent = fmt.format(p.salario);
+  $('cltBen').textContent = clt.beneficios > 0 ? '+ ' + fmt.format(clt.beneficios) : 'R$ 0,00';
   $('cltInss').textContent = '− ' + fmt.format(clt.inss);
   $('cltIrrf').textContent = '− ' + fmt.format(clt.irrf);
   $('cltLiqM').textContent = fmt.format(clt.liquidoMensal);
@@ -1013,6 +1110,11 @@ function render() {
   $('pjCpp').textContent = '− ' + fmt.format(pj.cppMensal);
   $('pjContab').textContent = '− ' + fmt.format(p.contab);
   $('pjAdmin').textContent = '− ' + fmt.format(p.admin);
+  $('pjEnergia').textContent = '− ' + fmt.format(p.energia);
+  $('pjCert').textContent = '− ' + fmt.format(p.cert / 12);
+  $('pjAlvara').textContent = '− ' + fmt.format(p.alvara / 12);
+  $('pjManut').textContent = '− ' + fmt.format(p.manut);
+  $('pjDemais').textContent = '− ' + fmt.format(p.demais);
   $('pjPl').textContent = fmt.format(pj.proLabore);
   $('pjLiqM').textContent = fmt.format(pj.liquidoMensal);
   $('pjLiqA').textContent = fmt.format(pj.liquidoAnual);
@@ -1037,7 +1139,7 @@ document.querySelectorAll('#chips button').forEach(b => b.addEventListener('clic
 function updateLeadLink() {
   const nome = $('leadNome').value.trim();
   const zap = $('leadZap').value.trim();
-  let msg = `Olá! Vim do Simulador PJ x CLT da ${CONFIG.empresaNome}.`;
+  let msg = `Olá! Vim do Simulador PJ (Fator R Flutuante) x CLT da ${CONFIG.empresaNome}.`;
   if (nome) msg += ` Meu nome é ${nome}.`;
   if (zap) msg += ` Meu WhatsApp: ${zap}.`;
   if (lastState) {
@@ -1068,7 +1170,9 @@ let debounceT = null;
 function scheduleRender() { clearTimeout(debounceT); debounceT = setTimeout(render, 300); }
 
 ['inSalario', 'inFaturamento', 'inDependentes', 'advMeses', 'advFgts', 'advPatronal', 'advDedDep',
- 'advContab', 'advAdmin', 'advAbertura', 'advFatorR', 'advCpp', 'advPlManual']
+ 'advContab', 'advAdmin', 'advEnergia', 'advCert', 'advAlvara', 'advManut', 'advDemais',
+ 'benVA', 'benSaude', 'benDente', 'benAcad', 'benCreche', 'benOutros',
+ 'advAbertura', 'advFatorR', 'advCpp', 'advPlManual']
   .forEach(id => $(id).addEventListener('input', scheduleRender));
 ['advSimplificado', 'advPlAuto', 'advDiluir'].forEach(id => $(id).addEventListener('change', () => {
   $('plManualWrap').style.display = $('advPlAuto').checked ? 'none' : 'block';
@@ -1098,7 +1202,8 @@ $('negData').textContent = new Date().toLocaleDateString('pt-BR');
    ============================================================ */
 (function selfTest() {
   const p = { salario: 13000, dependentes: 0, mesesCLT: 13, fgtsPct: .08, patronalPct: .20,
-              contab: 300, admin: 150, abertura: 600, fatorRMin: .28, cppPct: 0,
+              contab: 300, admin: 150, energia: 0, cert: 190, alvara: 250, manut: 100, demais: 0,
+              beneficios: 0, abertura: 600, fatorRMin: .28, cppPct: 0,
               usarSimplificado: true, plAuto: true, plManual: 0 };
   const clt = calcCLT(p);
   const pj15 = calcPJ(15000, p);
@@ -1109,18 +1214,23 @@ $('negData').textContent = new Date().toLocaleDateString('pt-BR');
   };
   ok('Líquido CLT mensal', clt.liquidoMensal, 9643.80);
   ok('Custo anual empresa', clt.custoAnual, 238506.67);
-  ok('PJ 15k líquido mensal', pj15.liquidoMensal, 13107.64);
+  ok('PJ 15k líquido mensal (custos detalhados)', pj15.liquidoMensal, 12970.98);
   ok('PJ 15k pró-labore', pj15.proLabore, 4200);
   // A equivalência assume pró-labore mínimo recalculado a cada faturamento (28% do RBT12,
   // regra do Fator R) — por isso o ponto de empate deste cenário fica em R$ 11.050.
-  ok('Equivalência mês a mês (PL recalculado)', eq.faturamento, 11050, 0);
-  ok('Líquido na equivalência', eq.pj.liquidoMensal, 9667.96);
+  ok('Equivalência mês a mês (PL recalculado)', eq.faturamento, 11200, 0);
+  ok('Líquido na equivalência', eq.pj.liquidoMensal, 9664.10);
   // Comparação anualizada (13º + 1/3 de férias diluídos no mês) — padrão do app
   ok('CLT 1/3 férias líquido', clt.liquidoTerco, 3214.60);
   ok('CLT média mensal anualizada', clt.liquidoMensalMedio, 10715.33);
   const eqA = findEquivalencia(clt.liquidoMensalMedio, p);
-  ok('Equivalência anualizada', eqA.faturamento, 12250, 0);
-  ok('Líquido PJ na equivalência anualizada', eqA.pj.liquidoMensal, 10730.44);
+  ok('Equivalência anualizada', eqA.faturamento, 12400, 0);
+  ok('Líquido PJ na equivalência anualizada', eqA.pj.liquidoMensal, 10723.72);
+  // Benefícios do funcionário (pedido do Natanael): somam no pacote CLT e no custo da empresa
+  const pb = Object.assign({}, p, { beneficios: 1000 });
+  const cb = calcCLT(pb);
+  ok('Benefícios 1000: média anualizada +1000', cb.liquidoMensalMedio, clt.liquidoMensalMedio + 1000);
+  ok('Benefícios 1000: custo empresa +12000/ano', cb.custoAnual, clt.custoAnual + 12000);
 })();
 
 render();
