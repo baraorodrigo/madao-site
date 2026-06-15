@@ -198,6 +198,28 @@ details.memo[open] summary::before{transform:rotate(90deg)}
 .btn{display:block;width:100%;background:var(--blue);color:#fff;border:none;padding:15px;border-radius:11px;font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none}
 .btn:hover{background:var(--blue-dark)}
 
+/* ---------- HERO de negociação (informação principal do dashboard) ---------- */
+.neg-hero{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 22px 18px;margin-top:16px}
+.neg-hero .eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#9db1ff;display:flex;align-items:center;gap:7px}
+.neg-hero .eyebrow .tip{background:rgba(255,255,255,.25)}
+.neg-hero .big{font-size:clamp(2rem,7vw,2.9rem);font-weight:800;line-height:1.05;margin:8px 0 2px;letter-spacing:-.02em}
+.neg-hero .big small{font-size:1rem;font-weight:600;opacity:.8}
+.neg-hero .resumo{font-size:.92rem;opacity:.92;max-width:60ch}
+.neg-hero .resumo b{color:#9db1ff}
+.neg-hero .nbar{position:relative;height:14px;border-radius:8px;background:linear-gradient(90deg,#7dd6a8,#9db1ff);margin:42px 12px 60px}
+.neg-hero .nbar .mk{position:absolute;top:-9px;width:3px;height:32px;background:#fff;border-radius:2px;transform:translateX(-50%)}
+.neg-hero .nbar .mk .cap{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:.7rem;font-weight:700;color:rgba(255,255,255,.85)}
+.neg-hero .nbar .mk .cap.top{bottom:38px}
+.neg-hero .nbar .mk .cap.bot{top:38px}
+.neg-hero .nbar .mk.justo{width:7px;height:40px;top:-13px;background:var(--yellow);box-shadow:0 0 0 3px rgba(255,255,255,.25)}
+.neg-hero .nbar .mk.justo .cap{color:#fff;font-size:.82rem}
+.neg-hero .acts{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px}
+.neg-hero .ir-rel{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:99px;padding:9px 16px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none}
+.neg-hero .ir-rel:hover{background:rgba(255,255,255,.24)}
+.neg-hero.lose{background:linear-gradient(135deg,#5b1e1e,#c0392b)}
+.neg-hero.lose .eyebrow,.neg-hero.lose .resumo b{color:#ffc9c2}
+.sub-head{font-size:.74rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);font-weight:700;margin:26px 0 -4px}
+
 /* ---------- relatório de negociação ---------- */
 #negCard{border-left:6px solid var(--blue)}
 .neg-brandrow{display:flex;align-items:center;gap:11px;margin-bottom:14px;padding-bottom:12px;border-bottom:2px solid var(--yellow)}
@@ -368,7 +390,25 @@ footer li{margin-bottom:4px}
   <!-- ======== DASHBOARD ======== -->
   <section id="results">
 
-    <!-- KPIs -->
+    <!-- HERO DE NEGOCIAÇÃO (informação principal) -->
+    <div class="neg-hero" id="negHero">
+      <div class="eyebrow">Quanto cobrar como PJ — o ponto justo
+        <button class="tip" data-tip="O valor de negociação que fica no meio do caminho entre o piso (onde você só empata o líquido CLT) e o teto (o custo real que a empresa tem com você na CLT). Nesse ponto os dois lados ganham.">?</button>
+      </div>
+      <div class="big" id="heroJusto"></div>
+      <div class="resumo" id="heroResumo"></div>
+      <div class="nbar" id="heroBar">
+        <span class="mk piso" id="heroMkPiso" style="left:0%"><span class="cap top" id="heroCapPiso"></span></span>
+        <span class="mk justo" id="heroMkJusto" style="left:50%"><span class="cap bot" id="heroCapJusto"></span></span>
+        <span class="mk teto" id="heroMkTeto" style="left:100%"><span class="cap top" id="heroCapTeto"></span></span>
+      </div>
+      <div class="acts">
+        <a class="ir-rel" href="#negCard" id="heroIrRel">Ver relatório completo de negociação ↓</a>
+      </div>
+    </div>
+
+    <!-- KPIs (secundários) -->
+    <div class="sub-head">Os números por trás</div>
     <div class="kpis">
       <div class="kpi k-clt">
         <div class="lbl">Líquido CLT /mês
@@ -880,6 +920,37 @@ function render() {
     ? `Como PJ faturando ${fmt0.format(fat)}/mês, sobra ${fmt.format(diff)} a mais por mês que a ${alvoLabel} (+${pct(diff / alvoCLT)}). No ano, são ${fmt.format(pj.liquidoAnual - clt.liquidoAnual)} a mais no bolso.`
     : `Faturando ${fmt0.format(fat)}/mês como PJ você receberia ${fmt.format(-diff)} a menos que a ${alvoLabel}. ${eq ? `Para valer a pena, mire faturar a partir de ${fmt0.format(eq.faturamento)}/mês.` : 'Nesse cenário a CLT é melhor em toda a faixa simulada.'}`;
 
+  // --- HERO de negociação (informação principal — calculado primeiro, reusado no relatório) ---
+  const piso = eq ? eq.faturamento : null;
+  const teto = clt.custoMensal;
+  const temZona = piso && teto > piso;
+  let justo, pjJusto, ganhoJusto, ecoJusto;
+  const hero = $('negHero');
+  if (temZona) {
+    justo = Math.round((piso + teto) / 2 / 50) * 50;
+    pjJusto = calcPJ(justo, p);
+    ganhoJusto = pjJusto.liquidoMensal - alvoCLT;
+    ecoJusto = (teto - justo) * 12;
+    hero.classList.remove('lose');
+    $('heroBar').style.display = '';
+    $('heroIrRel').style.display = '';
+    $('heroJusto').innerHTML = `${fmt0.format(justo)}<small>/mês como PJ</small>`;
+    $('heroResumo').innerHTML =
+      `Cobrando esse valor, você leva <b>${fmt.format(ganhoJusto)}/mês a mais</b> que na CLT pelo risco que assume — e a empresa ainda economiza <b>${fmt.format(ecoJusto)}/ano</b>. ` +
+      `Qualquer valor entre o piso e o teto é ganha-ganha.`;
+    const posH = v => Math.max(0, Math.min(100, (v - piso) / (teto - piso) * 100)).toFixed(1) + '%';
+    $('heroCapPiso').textContent = `Piso ${fmt0.format(piso)}`;
+    $('heroMkJusto').style.left = posH(justo);
+    $('heroCapJusto').textContent = `Justo ${fmt0.format(justo)}`;
+    $('heroCapTeto').textContent = `Teto ${fmt0.format(Math.round(teto))}`;
+  } else {
+    hero.classList.add('lose');
+    $('heroBar').style.display = 'none';
+    $('heroIrRel').style.display = 'none';
+    $('heroJusto').textContent = 'Nesse cenário, a CLT vence';
+    $('heroResumo').textContent = 'Com este salário e estes custos, não há faixa de faturamento (até R$ 50 mil/mês) em que virar PJ compense para os dois lados. Veja o comparativo abaixo.';
+  }
+
   // --- slider ---
   const slider = $('slider');
   if (parseFloat(slider.value) !== fat) slider.value = fat;
@@ -1020,15 +1091,9 @@ function render() {
   $('pctBarFill').style.width = (pjPctCusto * 100) + '%';
   $('pctBarTxt').textContent = `PJ custa ${pct(pjPctCusto)} do custo CLT`;
 
-  // --- relatório de negociação ---
-  const piso = eq ? eq.faturamento : null;
-  const teto = clt.custoMensal;
-  if (piso && teto > piso) {
+  // --- relatório de negociação (reusa piso/justo/teto já calculados no hero) ---
+  if (temZona) {
     $('negCard').style.display = 'block';
-    const justo = Math.round((piso + teto) / 2 / 50) * 50;
-    const pjJusto = calcPJ(justo, p);
-    const ganhoJusto = pjJusto.liquidoMensal - alvoCLT;
-    const ecoJusto = (teto - justo) * 12;
     // lado a lado — situação simulada
     $('llBruto').textContent = fmt.format(p.salario);
     $('llBen').textContent = clt.beneficios > 0 ? '+ ' + fmt.format(clt.beneficios) : 'R$ 0,00';
