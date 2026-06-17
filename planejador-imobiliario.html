@@ -92,6 +92,8 @@ details.adv .field input{font-size:.9rem;padding:9px 10px}
 .alerta.amber{background:var(--warn-soft);color:#7a4d00;border-left:4px solid var(--warn)}
 .duo{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
 @media(min-width:680px){.duo{grid-template-columns:1fr 1fr}}
+.trio{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
+@media(min-width:720px){.trio{grid-template-columns:1fr 1fr 1fr}}
 .col{border:1px solid var(--border);border-radius:12px;padding:16px}
 .col h3{font-size:.9rem;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-weight:800}
 .col h3 .tag{font-size:.64rem;padding:3px 10px;border-radius:99px;background:var(--bg);color:var(--text-soft);font-weight:700}
@@ -264,33 +266,74 @@ footer{margin-top:24px;font-size:.72rem;color:var(--text-soft)}
       <div class="field"><label for="aDesp">Despesas dedutíveis PF (R$/mês)
         <button class="tip" data-tip="Condomínio e IPTU pagos por você (proprietário) podem ser abatidos da base do carnê-leão.">?</button>
       </label><input type="text" id="aDesp" inputmode="decimal" placeholder="0"></div>
-      <div class="field"><label for="aContab">Contabilidade da PJ (R$/mês)</label><input type="number" id="aContab" value="400" step="50" min="0"></div>
     </div>
+    <details class="adv">
+      <summary>Custos de manutenção do CNPJ e venda futura (editáveis)</summary>
+      <div class="fields f4">
+        <div class="field"><label for="aContabLP">Contabilidade — Lucro Presumido (R$/mês)</label><input type="number" id="aContabLP" value="700" step="50" min="0"></div>
+        <div class="field"><label for="aContabSN">Contabilidade — Simples Nacional (R$/mês)</label><input type="number" id="aContabSN" value="300" step="50" min="0"></div>
+      </div>
+      <p style="padding:2px 16px 8px;font-size:.78rem;color:var(--text-soft)">Para comparar também o imposto na <b>venda futura</b> do imóvel, preencha abaixo:</p>
+      <div class="fields f4">
+        <div class="field"><label for="aImovel">Valor de mercado do imóvel (R$)</label><input type="text" id="aImovel" inputmode="decimal" placeholder="ex.: 600.000"></div>
+        <div class="field"><label for="aAquis">Valor de aquisição (R$)</label><input type="text" id="aAquis" inputmode="decimal" placeholder="ex.: 300.000"></div>
+        <div class="field"><label for="aData">Data de aquisição</label><input type="month" id="aData" min="1960-01"></div>
+      </div>
+    </details>
   </div>
   <div class="placeholder" id="aPlaceholder">↑ Informe a receita mensal de aluguéis.</div>
   <div id="aOut" style="display:none">
     <div class="verdict" id="aVerdict"><span class="ico" id="aVIco"></span><span id="aVTxt"></span></div>
-    <div class="card"><h2>Comparativo mensal e anual</h2>
-      <div class="duo">
+    <div class="card"><h2>Comparativo do aluguel — líquido por regime</h2>
+      <div class="trio">
         <div class="col" id="aColPF"><h3>Pessoa Física <span class="tag">carnê-leão
-          <button class="tip" data-tip="O 'carnê' mensal obrigatório de quem recebe aluguel como pessoa física: o IR é calculado pela mesma tabela progressiva do salário, chegando a 27,5%.">?</button></span></h3>
+          <button class="tip" data-tip="O 'carnê' mensal de quem recebe aluguel como PF: IR pela tabela progressiva, até 27,5%. Sem CNPJ para manter.">?</button></span></h3>
           <div class="line"><span class="lbl">Base de cálculo</span><span class="val" id="aBasePF"></span></div>
-          <div class="line neg"><span class="lbl">IR mensal (tabela progressiva)</span><span class="val" id="aIrPF"></span></div>
+          <div class="line neg"><span class="lbl">IR mensal (progressivo)</span><span class="val" id="aIrPF"></span></div>
           <div class="line"><span class="lbl">Alíquota efetiva</span><span class="val" id="aEfPF"></span></div>
-          <div class="line total"><span class="lbl">Líquido /mês · /ano</span><span class="val" id="aLiqPF"></span></div>
+          <div class="line total"><span class="lbl">Líquido /mês</span><span class="val" id="aLiqPF"></span></div>
+          <div class="line"><span class="lbl">Líquido /ano</span><span class="val" id="aLiqPFa"></span></div>
         </div>
-        <div class="col" id="aColPJ"><h3>Lucro Presumido <span class="tag">presunção 32%
-          <button class="tip" data-tip="No lucro presumido, a lei 'presume' que 32% da receita de aluguel é lucro e tributa só essa parte — o que dá ~11,33% sobre o aluguel, fixo, independente do volume.">?</button></span></h3>
+        <div class="col" id="aColLP"><h3>Lucro Presumido <span class="tag">presunção 32%
+          <button class="tip" data-tip="A lei presume 32% da receita como lucro e tributa só essa parte → ~11,33% fixo sobre o aluguel, independente do volume. Mais contabilidade mensal.">?</button></span></h3>
           <div class="line neg"><span class="lbl">IRPJ + adicional</span><span class="val" id="aIrpj"></span></div>
           <div class="line neg"><span class="lbl">CSLL</span><span class="val" id="aCsll"></span></div>
           <div class="line neg"><span class="lbl">PIS + COFINS</span><span class="val" id="aPisCofins"></span></div>
-          <div class="line neg"><span class="lbl">Contabilidade</span><span class="val" id="aContabL"></span></div>
-          <div class="line"><span class="lbl">Alíquota efetiva (s/ contab.)</span><span class="val" id="aEfPJ"></span></div>
-          <div class="line total"><span class="lbl">Líquido /mês · /ano</span><span class="val" id="aLiqPJ"></span></div>
+          <div class="line neg"><span class="lbl">Contabilidade (CNPJ)</span><span class="val" id="aContabLPv"></span></div>
+          <div class="line"><span class="lbl">Alíquota efetiva (s/ contab.)</span><span class="val" id="aEfLP"></span></div>
+          <div class="line total"><span class="lbl">Líquido /mês</span><span class="val" id="aLiqLP"></span></div>
+          <div class="line"><span class="lbl">Líquido /ano</span><span class="val" id="aLiqLPa"></span></div>
+        </div>
+        <div class="col" id="aColSN"><h3>Simples Nacional <span class="tag">Fator R · Anexo III
+          <button class="tip" data-tip="Com pró-labore de 28% da receita, o Fator R garante o Anexo III (DAS a partir de 6%). O pró-labore gera INSS e IRRF, contados aqui como custo. Atenção: locação de imóveis próprios costuma ser vedada ao Simples — confirme o enquadramento (CNAE) com o contador.">?</button></span></h3>
+          <div class="line neg"><span class="lbl">DAS (Anexo III)</span><span class="val" id="aSnDas"></span></div>
+          <div class="line neg"><span class="lbl">INSS s/ pró-labore (28%)</span><span class="val" id="aSnInss"></span></div>
+          <div class="line neg"><span class="lbl">IRRF s/ pró-labore</span><span class="val" id="aSnIrrf"></span></div>
+          <div class="line neg"><span class="lbl">Contabilidade (CNPJ)</span><span class="val" id="aContabSNv"></span></div>
+          <div class="line"><span class="lbl">Alíquota efetiva (s/ contab.)</span><span class="val" id="aEfSN"></span></div>
+          <div class="line total"><span class="lbl">Líquido /mês</span><span class="val" id="aLiqSN"></span></div>
+          <div class="line"><span class="lbl">Líquido /ano</span><span class="val" id="aLiqSNa"></span></div>
         </div>
       </div>
     </div>
-    <div class="card"><h2>Onde o Lucro Presumido começa a compensar</h2>
+    <div class="card" id="aVendaCard" style="display:none"><h2>E quando vender o imóvel? — imposto na venda por regime</h2>
+      <div class="trio">
+        <div class="col" id="avPF"><h3>Pessoa Física</h3>
+          <div class="line"><span class="lbl">Imposto na venda</span><span class="val" id="avPFv"></span></div>
+          <div class="line"><span class="lbl">Regra</span><span class="val" style="font-weight:400;color:var(--text-soft)">ganho de capital com redutores por tempo</span></div>
+        </div>
+        <div class="col" id="avLP"><h3>Lucro Presumido</h3>
+          <div class="line"><span class="lbl">Imposto na venda</span><span class="val" id="avLPv"></span></div>
+          <div class="line"><span class="lbl">Regra</span><span class="val" style="font-weight:400;color:var(--text-soft)">imóvel no ativo → 34% sobre o ganho</span></div>
+        </div>
+        <div class="col" id="avSN"><h3>Simples Nacional</h3>
+          <div class="line"><span class="lbl">Imposto na venda</span><span class="val" id="avSNv"></span></div>
+          <div class="line"><span class="lbl">Regra</span><span class="val" style="font-weight:400;color:var(--text-soft)">ganho de capital 15–22,5% (sem redutores)</span></div>
+        </div>
+      </div>
+      <p class="chart-cap" id="aVendaCap" style="text-align:left"></p>
+    </div>
+    <div class="card"><h2>Onde a PJ começa a compensar (aluguel)</h2>
       <div class="chart-box"><canvas id="aChart"></canvas></div>
       <div class="chart-cap" id="aChartCap"></div>
     </div>
@@ -396,6 +439,25 @@ const IRRF_TABELA = [
   { ate: Infinity, aliq: 0.275, deduz: 908.73 },
 ];
 const ISENCAO_UNICO_LIMITE = 440000;   // único imóvel ≤ 440k (art. 23 Lei 9.250/95)
+// Simples Nacional — Fator R (pró-labore 28% da receita garante Anexo III)
+const FATOR_R_MIN = 0.28;
+const INSS_TETO = 8157.41;
+const INSS_FAIXAS = [
+  { de: 0, ate: 1518.00, aliq: 0.075 }, { de: 1518.00, ate: 2793.88, aliq: 0.09 },
+  { de: 2793.88, ate: 4190.83, aliq: 0.12 }, { de: 4190.83, ate: 8157.41, aliq: 0.14 },
+];
+const IRRF_SIMPLIFICADO = 607.20;
+const ANEXO_III = [
+  { ate: 180000, aliq: 0.06, deduz: 0 }, { ate: 360000, aliq: 0.112, deduz: 9360 },
+  { ate: 720000, aliq: 0.135, deduz: 17640 }, { ate: 1800000, aliq: 0.16, deduz: 35640 },
+  { ate: 3600000, aliq: 0.21, deduz: 125640 }, { ate: 4800000, aliq: 0.33, deduz: 648000 },
+];
+const ANEXO_V = [
+  { ate: 180000, aliq: 0.155, deduz: 0 }, { ate: 360000, aliq: 0.18, deduz: 4500 },
+  { ate: 720000, aliq: 0.195, deduz: 9900 }, { ate: 1800000, aliq: 0.205, deduz: 17100 },
+  { ate: 3600000, aliq: 0.23, deduz: 62100 }, { ate: 4800000, aliq: 0.305, deduz: 540000 },
+];
+const CONTAB_PRESUMIDO = 700, CONTAB_SIMPLES = 300;   // manutenção mensal do CNPJ por regime
 
 /* ============================================================
    MOTOR — MÓDULO 1: VENDA (PF ganho de capital × PJ presumido)
@@ -499,6 +561,49 @@ function aluguelPJ(receita, contab) {
   return { irpj, adicional, csll, piscofins, imposto, contab,
            efetiva: receita > 0 ? imposto / receita : 0,
            total: imposto + contab, liquido: receita - imposto - contab };
+}
+
+// INSS progressivo (pró-labore), capado no teto
+function inssProgressivo(base) {
+  const b = Math.min(base, INSS_TETO);
+  let t = 0;
+  for (const f of INSS_FAIXAS) t += Math.max(0, Math.min(b, f.ate) - f.de) * f.aliq;
+  return t;
+}
+function irrfProLabore(pl) {
+  const ded = Math.max(inssProgressivo(pl), IRRF_SIMPLIFICADO);
+  return irrfTabela(Math.max(0, pl - ded));
+}
+function aliqEfetivaSimples(tabela, rbt12) {
+  if (rbt12 <= 0) return tabela[0].aliq;
+  let f = tabela[tabela.length - 1];
+  for (const x of tabela) { if (rbt12 <= x.ate) { f = x; break; } }
+  return Math.max(0, (rbt12 * f.aliq - f.deduz) / rbt12);
+}
+// Simples Nacional — locação com Fator R flutuante: pró-labore = 28% da receita garante Anexo III
+function aluguelSimples(receita, contab) {
+  const rbt12 = receita * 12;
+  const proLabore = receita * FATOR_R_MIN;          // 28% da receita → Fator R = 28% → Anexo III
+  const ef = aliqEfetivaSimples(ANEXO_III, rbt12);
+  const das = receita * ef;
+  const inssPL = inssProgressivo(proLabore);
+  const irrfPL = irrfProLabore(proLabore);
+  const imposto = das + inssPL + irrfPL;            // tributos sobre receita + sobre o pró-labore
+  return { proLabore, das, inssPL, irrfPL, ef, imposto, contab,
+           efetiva: receita > 0 ? imposto / receita : 0,
+           total: imposto + contab, liquido: receita - imposto - contab };
+}
+
+// Venda futura do imóvel de locação (ativo) em cada regime — estimativa
+function vendaRegime(regime, venda, aquisicao, aqY, aqM) {
+  if (venda <= 0 || aquisicao <= 0) return null;
+  if (regime === 'pf') {                            // ganho de capital PF com fatores de redução
+    return vendaPF({ venda, aquisicao, custos: 0, aqY, aqM, vdY: VD_Y, vdM: VD_M, unico: false, reinvestido: 0 }).imposto;
+  }
+  const ganho = Math.max(0, venda - aquisicao);
+  if (regime === 'presumido') return ganho * PJ_IMOBILIZADO;   // imóvel no ativo: 34% sobre o ganho
+  if (regime === 'simples') return irGanhoProgressivo(ganho);  // optante: ganho de capital 15–22,5%, sem redutores
+  return 0;
 }
 
 /* ============================================================
@@ -685,49 +790,97 @@ function agendar(fn) { clearTimeout(debounceTimers.get(fn)); debounceTimers.set(
 function renderAluguel() {
   const receita = parseMoney($('aReceita').value);
   const desp = parseMoney($('aDesp').value);
-  const contab = parseFloat($('aContab').value) || 0;
+  const contabLP = parseFloat($('aContabLP').value) || 0;
+  const contabSN = parseFloat($('aContabSN').value) || 0;
   const ok = receita > 0;
   $('aPlaceholder').style.display = ok ? 'none' : 'block';
   $('aOut').style.display = ok ? 'block' : 'none';
   if (!ok) return;
 
   const pf = aluguelPF(receita, desp);
-  const pj = aluguelPJ(receita, contab);
-  const eco = pf.ir - pj.total;            // economia mensal do Lucro Presumido
-  const win = eco > 0;
-  $('aVerdict').className = 'verdict ' + (win ? 'win' : 'neutral');
-  $('aVIco').textContent = win ? '✓' : '→';
-  $('aVTxt').textContent = win
-    ? `O Lucro Presumido economiza ${fmt.format(eco)}/mês (${fmt.format(eco * 12)}/ano): aluguel na PJ paga ${pct(pj.efetiva)} fixo, enquanto na PF você já está na faixa de ${pct(pf.base > 4664.68 ? .275 : .225)} marginal.`
-    : `Nesse volume a PF ainda compensa: o carnê-leão (${fmt.format(pf.ir)}/mês) fica abaixo do custo da PJ (${fmt.format(pj.total)}/mês com contabilidade). O Lucro Presumido passa a valer com receita maior.`;
+  const lp = aluguelPJ(receita, contabLP);
+  const sn = aluguelSimples(receita, contabSN);
 
-  $('aColPF').classList.toggle('melhor', !win);
-  $('aColPJ').classList.toggle('melhor', win);
+  // melhor regime = maior líquido
+  const opts = [['pf', pf.liquido], ['lp', lp.liquido], ['sn', sn.liquido]];
+  opts.sort((a, b) => b[1] - a[1]);
+  const melhor = opts[0][0], segundo = opts[1][1];
+  const nome = { pf: 'a Pessoa Física', lp: 'o Lucro Presumido', sn: 'o Simples Nacional (Anexo III)' };
+  $('aColPF').classList.toggle('melhor', melhor === 'pf');
+  $('aColLP').classList.toggle('melhor', melhor === 'lp');
+  $('aColSN').classList.toggle('melhor', melhor === 'sn');
+
+  // veredito
+  const ganhoMelhor = opts[0][1] - segundo;
+  $('aVerdict').className = 'verdict win';
+  $('aVIco').textContent = '✓';
+  $('aVTxt').textContent =
+    `Para aluguéis de ${fmt0.format(receita)}/mês, ${nome[melhor]} deixa o maior líquido: ${fmt.format(opts[0][1])}/mês — ` +
+    `${fmt.format(ganhoMelhor)}/mês (${fmt.format(ganhoMelhor * 12)}/ano) a mais que o segundo colocado. Já contando a contabilidade do CNPJ.`;
+
+  // PF
   $('aBasePF').textContent = fmt.format(pf.base);
   $('aIrPF').textContent = '− ' + fmt.format(pf.ir);
   $('aEfPF').textContent = pct(pf.efetiva);
-  $('aLiqPF').textContent = `${fmt.format(pf.liquido)} · ${fmt.format(pf.liquido * 12)}`;
-  $('aIrpj').textContent = '− ' + fmt.format(pj.irpj + pj.adicional);
-  $('aCsll').textContent = '− ' + fmt.format(pj.csll);
-  $('aPisCofins').textContent = '− ' + fmt.format(pj.piscofins);
-  $('aContabL').textContent = '− ' + fmt.format(contab);
-  $('aEfPJ').textContent = pct(pj.efetiva);
-  $('aLiqPJ').textContent = `${fmt.format(pj.liquido)} · ${fmt.format(pj.liquido * 12)}`;
+  $('aLiqPF').textContent = fmt.format(pf.liquido);
+  $('aLiqPFa').textContent = fmt.format(pf.liquido * 12);
+  // Lucro Presumido
+  $('aIrpj').textContent = '− ' + fmt.format(lp.irpj + lp.adicional);
+  $('aCsll').textContent = '− ' + fmt.format(lp.csll);
+  $('aPisCofins').textContent = '− ' + fmt.format(lp.piscofins);
+  $('aContabLPv').textContent = '− ' + fmt.format(contabLP);
+  $('aEfLP').textContent = pct(lp.efetiva);
+  $('aLiqLP').textContent = fmt.format(lp.liquido);
+  $('aLiqLPa').textContent = fmt.format(lp.liquido * 12);
+  // Simples Nacional
+  $('aSnDas').textContent = `− ${fmt.format(sn.das)} (${pct(sn.ef)})`;
+  $('aSnInss').textContent = '− ' + fmt.format(sn.inssPL);
+  $('aSnIrrf').textContent = '− ' + fmt.format(sn.irrfPL);
+  $('aContabSNv').textContent = '− ' + fmt.format(contabSN);
+  $('aEfSN').textContent = pct(sn.efetiva);
+  $('aLiqSN').textContent = fmt.format(sn.liquido);
+  $('aLiqSNa').textContent = fmt.format(sn.liquido * 12);
 
-  // curva: IR PF × custo PJ (Lucro Presumido) por receita
-  const labels = [], dPF = [], dPJ = [];
+  // venda futura (opcional)
+  const imovel = parseMoney($('aImovel').value), aquis = parseMoney($('aAquis').value);
+  const dt = parseMes($('aData').value);
+  if (imovel > 0 && aquis > 0 && dt) {
+    $('aVendaCard').style.display = 'block';
+    const vPF = vendaRegime('pf', imovel, aquis, dt.y, dt.m);
+    const vLP = vendaRegime('presumido', imovel, aquis, dt.y, dt.m);
+    const vSN = vendaRegime('simples', imovel, aquis, dt.y, dt.m);
+    $('avPFv').textContent = fmt.format(vPF);
+    $('avLPv').textContent = fmt.format(vLP);
+    $('avSNv').textContent = fmt.format(vSN);
+    const vmin = Math.min(vPF, vLP, vSN);
+    const qmin = vmin === vPF ? 'na Pessoa Física' : vmin === vSN ? 'no Simples' : 'no Lucro Presumido';
+    $('avPF').classList.toggle('melhor', vmin === vPF);
+    $('avLP').classList.toggle('melhor', vmin === vLP);
+    $('avSN').classList.toggle('melhor', vmin === vSN);
+    $('aVendaCap').innerHTML =
+      `Atenção ao “efeito saída”: o imóvel rende mais alugado numa PJ, mas <b>vender dentro da PJ costuma custar muito mais imposto</b> que vender como PF ` +
+      `(a PF tem redutores por tempo de posse que a PJ não tem). Aqui, vender ${qmin} é o mais barato. ` +
+      `Decida olhando o conjunto: anos de aluguel + a saída. Estimativa — confirme o enquadramento com o contador.`;
+  } else {
+    $('aVendaCard').style.display = 'none';
+  }
+
+  // curva: líquido dos 3 regimes por receita
+  const labels = [], dPF = [], dLP = [], dSN = [];
   for (let r = 1000; r <= 40000; r += 500) {
     labels.push(r);
-    dPF.push(aluguelPF(r, desp).ir);
-    dPJ.push(aluguelPJ(r, contab).total);
+    dPF.push(aluguelPF(r, desp).liquido);
+    dLP.push(aluguelPJ(r, contabLP).liquido);
+    dSN.push(aluguelSimples(r, contabSN).liquido);
   }
   const atualX = Math.max(1000, Math.min(40000, Math.round(receita / 500) * 500));
   upChart('aChart', {
     type: 'line',
     data: { labels, datasets: [
-      { label: 'IR na PF (carnê-leão)', data: dPF, borderColor: C.danger, borderWidth: 2.5, pointRadius: 0, tension: .15, fill: false },
-      { label: 'Custo PJ — Lucro Presumido (11,33% + contab.)', data: dPJ, borderColor: C.blue, borderWidth: 2.5, pointRadius: 0, tension: 0, fill: false },
-      { label: 'Você está aqui', data: labels.map(r => r === atualX ? aluguelPF(r, desp).ir : null), borderColor: C.navy, backgroundColor: C.yellow, pointRadius: 7, pointBorderWidth: 2.5, showLine: false },
+      { label: 'Líquido PF (carnê-leão)', data: dPF, borderColor: C.danger, borderWidth: 2.5, pointRadius: 0, tension: .15, fill: false },
+      { label: 'Líquido Lucro Presumido', data: dLP, borderColor: C.navy, borderWidth: 2.5, pointRadius: 0, tension: 0, fill: false },
+      { label: 'Líquido Simples (Anexo III)', data: dSN, borderColor: C.blue, borderWidth: 2.5, pointRadius: 0, tension: 0, fill: false },
+      { label: 'Você está aqui', data: labels.map(r => r === atualX ? aluguelSimples(r, contabSN).liquido : null), borderColor: C.navy, backgroundColor: '#7d97ff', pointRadius: 7, pointBorderWidth: 2.5, showLine: false },
     ] },
     options: { responsive: true, maintainAspectRatio: false, animation: false,
       interaction: { mode: 'index', intersect: false },
@@ -738,15 +891,15 @@ function renderAluguel() {
         y: { ticks: { callback: v => fmt0.format(v) }, grid: { color: C.grid } } },
     },
   });
-  // ponto onde o Lucro Presumido passa a ganhar
+  // a partir de quando a PJ (melhor entre LP/SN) supera a PF
   let cruza = null;
-  for (let i = 0; i < labels.length; i++) if (dPF[i] > dPJ[i]) { cruza = labels[i]; break; }
+  for (let i = 0; i < labels.length; i++) if (Math.max(dLP[i], dSN[i]) > dPF[i]) { cruza = labels[i]; break; }
   $('aChartCap').textContent = cruza
-    ? `O Lucro Presumido passa a compensar a partir de ~${fmt0.format(cruza)}/mês de aluguéis (com contabilidade de ${fmt0.format(contab)}/mês incluída na conta).`
-    : 'Nesta faixa de receita a PF segue mais barata.';
+    ? `A partir de ~${fmt0.format(cruza)}/mês de aluguéis, abrir um CNPJ (Simples ou Lucro Presumido) já deixa mais líquido que a PF, mesmo com a contabilidade.`
+    : 'Nesta faixa de receita a Pessoa Física segue mais vantajosa.';
   updateLeadLink();
 }
-['aReceita','aDesp','aContab'].forEach(id => $(id).addEventListener('input', () => agendar(renderAluguel)));
+['aReceita','aDesp','aContabLP','aContabSN','aImovel','aAquis','aData'].forEach(id => $(id).addEventListener('input', () => agendar(renderAluguel)));
 
 /* ============================================================
    UI — MÓDULO 4: MINHA CARTEIRA (localStorage)
@@ -824,7 +977,7 @@ function ctxCarteira() {
   return {
     nAlugados: carteira.filter(x => x.finalidade === 'alugar' && x.aluguel > 0).length,
     unicoImovel: carteira.length === 1,
-    contabHold: parseFloat($('aContab').value) || 400,
+    contabHold: parseFloat($('aContabLP').value) || CONTAB_PRESUMIDO,
   };
 }
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -947,7 +1100,7 @@ function resumoAtivo() {
       return `Simulei a venda de um imóvel por ${fmt0.format(pv.venda)} (IR PF estimado ${fmt0.format(pf.imposto)}).`;
     }
     if (tabAtiva === 'aluguel' && parseMoney($('aReceita').value) > 0)
-      return `Simulei aluguéis de ${fmt0.format(parseMoney($('aReceita').value))}/mês comparando PF × Lucro Presumido.`;
+      return `Simulei aluguéis de ${fmt0.format(parseMoney($('aReceita').value))}/mês comparando PF × Lucro Presumido × Simples Nacional.`;
     if (tabAtiva === 'carteira' && carteira.length) return `Tenho ${carteira.length} imóvel(is) cadastrados na carteira e quero a análise fina.`;
   } catch (e) {}
   return 'Usei o Planejador Tributário Imobiliário.';
@@ -1012,11 +1165,13 @@ document.addEventListener('click', e => {
   // C — isenção único imóvel
   const Cx = vendaPF({ venda: 430000, aquisicao: 200000, custos: 0, aqY: 2015, aqM: 1, vdY: 2026, vdM: 6, unico: true, reinvestido: 0 });
   ok('C: isenção único → IR zero', Cx.imposto, 0, 0);
-  // D — aluguel 10k/mês
-  const Dpf = aluguelPF(10000, 0), Dpj = aluguelPJ(10000, 400);
+  // D — aluguel 10k/mês: PF × Lucro Presumido × Simples (Fator R)
+  const Dpf = aluguelPF(10000, 0), Dlp = aluguelPJ(10000, 700), Dsn = aluguelSimples(10000, 300);
   ok('D: carnê-leão', Dpf.ir, 1841.27, 0.1);
-  ok('D: lucro presumido (s/ contab.)', Dpj.imposto, 1133, 0.1);
-  ok('D: economia c/ contab.', Dpf.ir - Dpj.total, 308.27, 0.5);
+  ok('D: lucro presumido (s/ contab.)', Dlp.imposto, 1133, 0.1);
+  ok('D: simples pró-labore 28%', Dsn.proLabore, 2800, 0.1);
+  ok('D: simples DAS Anexo III 6%', Dsn.das, 600, 0.1);
+  ok('D: simples líquido (s/ contab. 300)', Dsn.liquido, 8870.59, 0.5);
   // 7.713/88: aquisição 1980 → 45% de redução
   ok('7.713/88 ano 1980 (fator 0,55)', fator7713(1980), 0.55, 0);
   // Regressão (rev. adversarial): aquisição nov/2005 → FR2 conta de dez/2005 (m2=246 p/ venda jun/2026)
