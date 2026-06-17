@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Planejador Tributário Imobiliário — Madao Contabilidade</title>
-<meta name="description" content="Compare a tributação de venda de imóveis e aluguéis como pessoa física vs pessoa jurídica (holding), simule sucessão e analise sua carteira de imóveis.">
+<meta name="description" content="Compare a tributação de venda de imóveis e aluguéis como pessoa física vs pessoa jurídica (Simples Nacional e Lucro Presumido) e analise sua carteira de imóveis.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Archivo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -170,14 +170,13 @@ footer{margin-top:24px;font-size:.72rem;color:var(--text-soft)}
 </div></div>
 <header>
   <h1>Planejador Tributário <em>Imobiliário</em></h1>
-  <p>Venda, aluguel, holding e sucessão: descubra em qual estrutura cada operação paga menos imposto — PF ou PJ.</p>
+  <p>Venda e aluguel de imóveis: descubra em qual regime cada operação paga menos imposto — PF ou PJ.</p>
 </header>
 <div class="tabbar">
   <nav class="tabs">
     <button data-tab="venda" class="on"><span class="n">1</span>Venda</button>
     <button data-tab="aluguel"><span class="n">2</span>Aluguéis</button>
-    <button data-tab="holding"><span class="n">3</span>Holding</button>
-    <button data-tab="carteira"><span class="n">4</span>Carteira</button>
+    <button data-tab="carteira"><span class="n">3</span>Carteira</button>
   </nav>
 </div>
 
@@ -265,7 +264,7 @@ footer{margin-top:24px;font-size:.72rem;color:var(--text-soft)}
       <div class="field"><label for="aDesp">Despesas dedutíveis PF (R$/mês)
         <button class="tip" data-tip="Condomínio e IPTU pagos por você (proprietário) podem ser abatidos da base do carnê-leão.">?</button>
       </label><input type="text" id="aDesp" inputmode="decimal" placeholder="0"></div>
-      <div class="field"><label for="aContab">Contabilidade da holding (R$/mês)</label><input type="number" id="aContab" value="400" step="50" min="0"></div>
+      <div class="field"><label for="aContab">Contabilidade da PJ (R$/mês)</label><input type="number" id="aContab" value="400" step="50" min="0"></div>
     </div>
   </div>
   <div class="placeholder" id="aPlaceholder">↑ Informe a receita mensal de aluguéis.</div>
@@ -280,7 +279,7 @@ footer{margin-top:24px;font-size:.72rem;color:var(--text-soft)}
           <div class="line"><span class="lbl">Alíquota efetiva</span><span class="val" id="aEfPF"></span></div>
           <div class="line total"><span class="lbl">Líquido /mês · /ano</span><span class="val" id="aLiqPF"></span></div>
         </div>
-        <div class="col" id="aColPJ"><h3>Holding <span class="tag">presumido 32%
+        <div class="col" id="aColPJ"><h3>Lucro Presumido <span class="tag">presunção 32%
           <button class="tip" data-tip="No lucro presumido, a lei 'presume' que 32% da receita de aluguel é lucro e tributa só essa parte — o que dá ~11,33% sobre o aluguel, fixo, independente do volume.">?</button></span></h3>
           <div class="line neg"><span class="lbl">IRPJ + adicional</span><span class="val" id="aIrpj"></span></div>
           <div class="line neg"><span class="lbl">CSLL</span><span class="val" id="aCsll"></span></div>
@@ -291,77 +290,9 @@ footer{margin-top:24px;font-size:.72rem;color:var(--text-soft)}
         </div>
       </div>
     </div>
-    <div class="card"><h2>Onde a holding começa a compensar</h2>
+    <div class="card"><h2>Onde o Lucro Presumido começa a compensar</h2>
       <div class="chart-box"><canvas id="aChart"></canvas></div>
       <div class="chart-cap" id="aChartCap"></div>
-    </div>
-  </div>
-</section>
-
-<!-- ================= MÓDULO 3 — HOLDING & SUCESSÃO ================= -->
-<section class="tab-sec" id="tab-holding">
-  <div class="card">
-    <h2>Seu patrimônio e a sucessão</h2>
-    <div class="fields f4">
-      <div class="field main"><label for="hPatrimonio">Patrimônio imobiliário (R$)</label><input type="text" id="hPatrimonio" inputmode="decimal" placeholder="ex.: 3.000.000"><button class="btn3" id="hPuxar" style="margin-top:8px">usar minha carteira →</button></div>
-      <div class="field"><label for="hItcmd">ITCMD do estado (%)
-        <button class="tip" data-tip="Imposto estadual sobre herança e doação. Varia de 1% a 8% conforme o estado (SC: até 8% progressivo). Há discussões sobre a base de cálculo — confirme a alíquota do seu estado.">?</button>
-      </label><input type="number" id="hItcmd" value="8" step="0.5" min="0" max="8"></div>
-      <div class="field"><label for="hItcmdDoa">ITCMD na doação de quotas (%)</label><input type="number" id="hItcmdDoa" value="8" step="0.5" min="0" max="8"></div>
-      <div class="field"><label for="hHerdeiros">Nº de herdeiros</label><input type="number" id="hHerdeiros" value="2" step="1" min="1"></div>
-    </div>
-    <details class="adv">
-      <summary>Custos editáveis (honorários, custas, estrutura da holding)</summary>
-      <div class="fields f4">
-        <div class="field"><label>Honorários advocatícios do inventário (%)</label><input type="number" id="hHon" value="6" step="0.5" min="0"></div>
-        <div class="field"><label>Custas judiciais / cartório (%)</label><input type="number" id="hCustas" value="2" step="0.5" min="0"></div>
-        <div class="field"><label>ITBI na integralização (%)
-          <button class="tip" data-tip="Holding patrimonial SEM atividade imobiliária preponderante costuma ter imunidade de ITBI na integralização — por isso o padrão é 0%. Se houver atividade imobiliária, use 3%. Análise caso a caso.">?</button>
-        </label><input type="number" id="hItbi" value="0" step="0.5" min="0"></div>
-        <div class="field"><label>Constituição (R$) + contab. anual (R$)</label><input type="number" id="hConst" value="8000" step="500" min="0"><input type="number" id="hContabAno" value="4800" step="100" min="0" style="margin-top:6px"></div>
-      </div>
-    </details>
-  </div>
-  <div class="placeholder" id="hPlaceholder">↑ Informe o patrimônio para comparar inventário × holding.</div>
-  <div id="hOut" style="display:none">
-    <div class="verdict win" id="hVerdict"><span class="ico">✓</span><span id="hVTxt"></span></div>
-    <div class="card"><h2>Inventário × holding com doação de quotas</h2>
-      <div class="duo">
-        <div class="col"><h3>Sem planejamento <span class="tag">inventário</span></h3>
-          <div class="line neg"><span class="lbl">ITCMD sobre a herança</span><span class="val" id="hItcmdVal"></span></div>
-          <div class="line neg"><span class="lbl">Honorários advocatícios</span><span class="val" id="hHonVal"></span></div>
-          <div class="line neg"><span class="lbl">Custas judiciais / cartório</span><span class="val" id="hCustasVal"></span></div>
-          <div class="line total"><span class="lbl">Custo para os herdeiros</span><span class="val" id="hTotalInv"></span></div>
-          <div class="line"><span class="lbl">Tempo estimado</span><span class="val">1 a 5 anos, imóveis bloqueados</span></div>
-        </div>
-        <div class="col melhor"><h3>Com holding <span class="tag">doação de quotas + usufruto</span></h3>
-          <div class="line neg"><span class="lbl">ITCMD na doação das quotas
-            <button class="tip" data-tip="A doação das quotas em vida também paga ITCMD — mas resolve a sucessão de uma vez, sem inventário. Pode incidir sobre valor venal/patrimonial: confirme no seu estado.">?</button>
-          </span><span class="val" id="hDoaVal"></span></div>
-          <div class="line neg"><span class="lbl">ITBI integralização</span><span class="val" id="hItbiVal"></span></div>
-          <div class="line neg"><span class="lbl">Constituição + 1º ano de contabilidade</span><span class="val" id="hEstrVal"></span></div>
-          <div class="line total"><span class="lbl">Custo total do planejamento</span><span class="val" id="hTotalHold"></span></div>
-          <div class="line"><span class="lbl">Tempo</span><span class="val">resolvido em vida, sem bloqueio</span></div>
-        </div>
-      </div>
-      <div class="chart-box" style="height:140px"><canvas id="hChart"></canvas></div>
-    </div>
-    <div class="card"><h2>O que mais a holding traz</h2>
-      <div class="duo">
-        <div><b style="font-size:.85rem">Benefícios</b><ul class="lista">
-          <li>Proteção patrimonial: imóveis fora do CPF dos sócios</li>
-          <li>Evita conflito entre herdeiros — divisão definida em vida, com usufruto
-            <button class="tip" data-tip="Você doa as quotas mas mantém o usufruto: continua mandando na empresa e recebendo os aluguéis enquanto viver.">?</button></li>
-          <li>Aluguéis tributados a ~11,33% em vez de até 27,5% (módulo 2)</li>
-          <li>Sucessão sem inventário: sem anos de espera nem imóveis bloqueados</li>
-        </ul></div>
-        <div><b style="font-size:.85rem">Pontos de atenção</b><ul class="lista">
-          <li>Custo fixo anual de manutenção (contabilidade, declarações)</li>
-          <li>ITCMD incide na doação — alíquota e base variam por estado</li>
-          <li>Imunidade do ITBI exige análise da atividade preponderante</li>
-        </ul></div>
-      </div>
-      <div class="btnrow"><button class="btn2" id="hCta">Estruturar minha holding — agendar análise →</button></div>
     </div>
   </div>
 </section>
@@ -406,7 +337,7 @@ footer{margin-top:24px;font-size:.72rem;color:var(--text-soft)}
 </section>
 
 <footer>
-  <p><strong>Aviso:</strong> simulação com base na legislação vigente em jun/2026 (IR ganho de capital, Lei 11.196/2005, lucro presumido, ITCMD estadual). Os resultados são estimativas para fins de planejamento e NÃO constituem parecer tributário. Casos com imóvel rural, permuta, ganho acima de R$ 5 milhões, imóvel no ativo imobilizado ou holding exigem análise individualizada. Consulte um contador.</p>
+  <p><strong>Aviso:</strong> simulação com base na legislação vigente em jun/2026 (IR ganho de capital, Lei 11.196/2005, lucro presumido, ITCMD estadual). Os resultados são estimativas para fins de planejamento e NÃO constituem parecer tributário. Casos com imóvel rural, permuta, ganho acima de R$ 5 milhões, imóvel no ativo imobilizado exigem análise individualizada. Consulte um contador.</p>
 </footer>
 </div>
 
@@ -545,7 +476,7 @@ function vendaPJ(p) {
 }
 
 /* ============================================================
-   MOTOR — MÓDULO 2: ALUGUÉIS (carnê-leão × holding presumido)
+   MOTOR — MÓDULO 2: ALUGUÉIS (carnê-leão × lucro presumido)
    ============================================================ */
 function irrfTabela(base) {
   for (const f of IRRF_TABELA) if (base <= f.ate) return Math.max(0, base * f.aliq - f.deduz);
@@ -570,18 +501,6 @@ function aluguelPJ(receita, contab) {
            total: imposto + contab, liquido: receita - imposto - contab };
 }
 
-/* ============================================================
-   MOTOR — MÓDULO 3: SUCESSÃO (inventário × holding)
-   ============================================================ */
-function sucessao(p) {
-  // p: patrimonio, itcmdInv, hon, custas, itcmdDoa, itbiPct, constituicao, contabAno
-  const itcmd = p.patrimonio * p.itcmdInv, hon = p.patrimonio * p.hon, custas = p.patrimonio * p.custas;
-  const inventario = itcmd + hon + custas;
-  const doacao = p.patrimonio * p.itcmdDoa, itbi = p.patrimonio * p.itbiPct;
-  const holding = doacao + itbi + p.constituicao + p.contabAno;
-  return { itcmd, hon, custas, inventario, doacao, itbi,
-           estrutura: p.constituicao + p.contabAno, holding, economia: inventario - holding };
-}
 /* ============================================================
    UI — helpers e abas
    ============================================================ */
@@ -630,7 +549,7 @@ function upChart(id, cfg) {
   if (charts[id]) { charts[id].data = cfg.data; charts[id].options = cfg.options; charts[id].update('none'); }
   else charts[id] = new Chart($(id), cfg);
 }
-window.addEventListener('load', () => { renderVenda(); renderAluguel(); renderHolding(); renderCarteira(); });
+window.addEventListener('load', () => { renderVenda(); renderAluguel(); renderCarteira(); });
 
 /* ============================================================
    UI — MÓDULO 1: VENDA
@@ -774,13 +693,13 @@ function renderAluguel() {
 
   const pf = aluguelPF(receita, desp);
   const pj = aluguelPJ(receita, contab);
-  const eco = pf.ir - pj.total;            // economia mensal da holding
+  const eco = pf.ir - pj.total;            // economia mensal do Lucro Presumido
   const win = eco > 0;
   $('aVerdict').className = 'verdict ' + (win ? 'win' : 'neutral');
   $('aVIco').textContent = win ? '✓' : '→';
   $('aVTxt').textContent = win
-    ? `A holding economiza ${fmt.format(eco)}/mês (${fmt.format(eco * 12)}/ano): aluguel na PJ paga ${pct(pj.efetiva)} fixo, enquanto na PF você já está na faixa de ${pct(pf.base > 4664.68 ? .275 : .225)} marginal.`
-    : `Nesse volume a PF ainda compensa: o carnê-leão (${fmt.format(pf.ir)}/mês) fica abaixo do custo da holding (${fmt.format(pj.total)}/mês com contabilidade). A holding passa a valer com receita maior.`;
+    ? `O Lucro Presumido economiza ${fmt.format(eco)}/mês (${fmt.format(eco * 12)}/ano): aluguel na PJ paga ${pct(pj.efetiva)} fixo, enquanto na PF você já está na faixa de ${pct(pf.base > 4664.68 ? .275 : .225)} marginal.`
+    : `Nesse volume a PF ainda compensa: o carnê-leão (${fmt.format(pf.ir)}/mês) fica abaixo do custo da PJ (${fmt.format(pj.total)}/mês com contabilidade). O Lucro Presumido passa a valer com receita maior.`;
 
   $('aColPF').classList.toggle('melhor', !win);
   $('aColPJ').classList.toggle('melhor', win);
@@ -795,7 +714,7 @@ function renderAluguel() {
   $('aEfPJ').textContent = pct(pj.efetiva);
   $('aLiqPJ').textContent = `${fmt.format(pj.liquido)} · ${fmt.format(pj.liquido * 12)}`;
 
-  // curva: IR PF × custo holding por receita
+  // curva: IR PF × custo PJ (Lucro Presumido) por receita
   const labels = [], dPF = [], dPJ = [];
   for (let r = 1000; r <= 40000; r += 500) {
     labels.push(r);
@@ -807,7 +726,7 @@ function renderAluguel() {
     type: 'line',
     data: { labels, datasets: [
       { label: 'IR na PF (carnê-leão)', data: dPF, borderColor: C.danger, borderWidth: 2.5, pointRadius: 0, tension: .15, fill: false },
-      { label: 'Custo holding (11,33% + contab.)', data: dPJ, borderColor: C.blue, borderWidth: 2.5, pointRadius: 0, tension: 0, fill: false },
+      { label: 'Custo PJ — Lucro Presumido (11,33% + contab.)', data: dPJ, borderColor: C.blue, borderWidth: 2.5, pointRadius: 0, tension: 0, fill: false },
       { label: 'Você está aqui', data: labels.map(r => r === atualX ? aluguelPF(r, desp).ir : null), borderColor: C.navy, backgroundColor: C.yellow, pointRadius: 7, pointBorderWidth: 2.5, showLine: false },
     ] },
     options: { responsive: true, maintainAspectRatio: false, animation: false,
@@ -819,70 +738,16 @@ function renderAluguel() {
         y: { ticks: { callback: v => fmt0.format(v) }, grid: { color: C.grid } } },
     },
   });
-  // ponto onde a holding passa a ganhar
+  // ponto onde o Lucro Presumido passa a ganhar
   let cruza = null;
   for (let i = 0; i < labels.length; i++) if (dPF[i] > dPJ[i]) { cruza = labels[i]; break; }
   $('aChartCap').textContent = cruza
-    ? `A holding passa a compensar a partir de ~${fmt0.format(cruza)}/mês de aluguéis (com contabilidade de ${fmt0.format(contab)}/mês incluída na conta).`
+    ? `O Lucro Presumido passa a compensar a partir de ~${fmt0.format(cruza)}/mês de aluguéis (com contabilidade de ${fmt0.format(contab)}/mês incluída na conta).`
     : 'Nesta faixa de receita a PF segue mais barata.';
   updateLeadLink();
 }
 ['aReceita','aDesp','aContab'].forEach(id => $(id).addEventListener('input', () => agendar(renderAluguel)));
 
-/* ============================================================
-   UI — MÓDULO 3: HOLDING & SUCESSÃO
-   ============================================================ */
-function lerHolding() {
-  return {
-    patrimonio: parseMoney($('hPatrimonio').value),
-    itcmdInv: (parseFloat($('hItcmd').value) || 0) / 100,
-    itcmdDoa: (parseFloat($('hItcmdDoa').value) || 0) / 100,
-    herdeiros: parseInt($('hHerdeiros').value) || 1,
-    hon: (parseFloat($('hHon').value) || 0) / 100,
-    custas: (parseFloat($('hCustas').value) || 0) / 100,
-    itbiPct: (parseFloat($('hItbi').value) || 0) / 100,
-    constituicao: parseFloat($('hConst').value) || 0,
-    contabAno: parseFloat($('hContabAno').value) || 0,
-  };
-}
-function renderHolding() {
-  const p = lerHolding();
-  const ok = p.patrimonio > 0;
-  $('hPlaceholder').style.display = ok ? 'none' : 'block';
-  $('hOut').style.display = ok ? 'block' : 'none';
-  if (!ok) return;
-  const s = sucessao(p);
-  $('hVerdict').className = 'verdict ' + (s.economia > 0 ? 'win' : 'neutral');
-  $('hVerdict').querySelector('.ico').textContent = s.economia > 0 ? '✓' : '→';
-  $('hVTxt').textContent = s.economia > 0
-    ? `Sem planejamento, seus ${p.herdeiros} herdeiro(s) pagarão ~${fmt0.format(s.inventario)} e esperarão anos com os imóveis bloqueados. Com a holding, o custo único é de ~${fmt0.format(s.holding)} — economia de ${fmt.format(s.economia)} e sucessão resolvida em vida.`
-    : `Com os parâmetros atuais o inventário (${fmt0.format(s.inventario)}) sai mais barato que a holding (${fmt0.format(s.holding)}) — mas avalie os benefícios não financeiros (proteção, aluguéis a 11,33%, sem bloqueio).`;
-  $('hItcmdVal').textContent = '− ' + fmt.format(s.itcmd);
-  $('hHonVal').textContent = '− ' + fmt.format(s.hon);
-  $('hCustasVal').textContent = '− ' + fmt.format(s.custas);
-  $('hTotalInv').textContent = fmt.format(s.inventario);
-  $('hDoaVal').textContent = '− ' + fmt.format(s.doacao);
-  $('hItbiVal').textContent = s.itbi > 0 ? '− ' + fmt.format(s.itbi) : 'R$ 0 (imunidade — confirmar)';
-  $('hEstrVal').textContent = '− ' + fmt.format(s.estrutura);
-  $('hTotalHold').textContent = fmt.format(s.holding);
-  upChart('hChart', {
-    type: 'bar',
-    data: { labels: ['Inventário', 'Holding'], datasets: [{
-      data: [s.inventario, s.holding], backgroundColor: [C.danger, C.ok], borderRadius: 8, barThickness: 30 }] },
-    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, animation: false,
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + fmt.format(c.parsed.x) } } },
-      scales: { x: { ticks: { callback: v => fmt0.format(v) }, grid: { color: C.grid } }, y: { grid: { display: false } } } },
-  });
-  updateLeadLink();
-}
-['hPatrimonio','hItcmd','hItcmdDoa','hHerdeiros','hHon','hCustas','hItbi','hConst','hContabAno']
-  .forEach(id => $(id).addEventListener('input', () => agendar(renderHolding)));
-$('hPuxar').addEventListener('click', () => {
-  const tot = carteira.reduce((s, im) => s + im.mercado, 0);
-  if (tot > 0) { $('hPatrimonio').value = tot.toLocaleString('pt-BR'); renderHolding(); }
-  else alert('Cadastre imóveis na aba "Minha Carteira" primeiro.');
-});
-$('hCta').addEventListener('click', () => abrirModal());
 /* ============================================================
    UI — MÓDULO 4: MINHA CARTEIRA (localStorage)
    ============================================================ */
@@ -931,12 +796,12 @@ $('cCancelar').addEventListener('click', () => {
 function analisarImovel(im, ctx) {
   ctx = ctx || { nAlugados: 1, unicoImovel: true, contabHold: 400 };
   if (im.finalidade === 'alugar' && im.aluguel > 0) {
-    // contabilidade da holding rateada entre os imóveis alugados — coerente com o módulo 2
+    // contabilidade da PJ rateada entre os imóveis alugados — coerente com o módulo 2
     const contabRateada = ctx.nAlugados > 0 ? ctx.contabHold / ctx.nAlugados : ctx.contabHold;
     const pf = aluguelPF(im.aluguel, 0), pj = aluguelPJ(im.aluguel, contabRateada);
     const eco = pf.ir - pj.total;
     return { tipo: 'alugar', impostoPF: pf.ir * 12, impostoOtim: Math.min(pf.ir, pj.total) * 12,
-             badge: eco > 0 ? ['pj', `holding: −${fmt0.format(eco)}/mês`] : ['pf', 'manter na PF'] };
+             badge: eco > 0 ? ['pj', `Lucro Presumido: −${fmt0.format(eco)}/mês`] : ['pf', 'manter na PF'] };
   }
   if (im.finalidade === 'vender') {
     const base = { venda: im.mercado, aquisicao: im.aquisicao, custos: 0, aqY: im.aqY, aqM: im.aqM,
@@ -986,7 +851,7 @@ function renderCarteira() {
   $('cGanho').textContent = fmt0.format(ganho);
   $('cImpostoPF').textContent = fmt0.format(impPF);
   $('cEconomia').textContent = fmt0.format(Math.max(0, impPF - impOtim));
-  $('cResumo').textContent = `Cenário "tudo na PF": ~${fmt0.format(impPF)} de impostos (vendas + 12 meses de aluguéis). Estrutura otimizada (cada imóvel na melhor opção + holding para os aluguéis): ~${fmt0.format(impOtim)} — economia potencial de ${fmt0.format(Math.max(0, impPF - impOtim))}. Estrutura/contabilidade da holding não rateadas aqui: peça a análise fina.`;
+  $('cResumo').textContent = `Cenário "tudo na PF": ~${fmt0.format(impPF)} de impostos (vendas + 12 meses de aluguéis). Estrutura otimizada (cada imóvel na melhor opção + Lucro Presumido para os aluguéis): ~${fmt0.format(impOtim)} — economia potencial de ${fmt0.format(Math.max(0, impPF - impOtim))}. Contabilidade da PJ não rateada aqui: peça a análise fina.`;
   updateLeadLink();
 }
 $('cTbody') && document.addEventListener('click', e => {
@@ -1082,11 +947,7 @@ function resumoAtivo() {
       return `Simulei a venda de um imóvel por ${fmt0.format(pv.venda)} (IR PF estimado ${fmt0.format(pf.imposto)}).`;
     }
     if (tabAtiva === 'aluguel' && parseMoney($('aReceita').value) > 0)
-      return `Simulei aluguéis de ${fmt0.format(parseMoney($('aReceita').value))}/mês comparando PF × holding.`;
-    if (tabAtiva === 'holding' && parseMoney($('hPatrimonio').value) > 0) {
-      const s = sucessao(lerHolding());
-      return `Simulei a sucessão de ${fmt0.format(lerHolding().patrimonio)} — economia potencial de ${fmt0.format(Math.max(0, s.economia))} com holding.`;
-    }
+      return `Simulei aluguéis de ${fmt0.format(parseMoney($('aReceita').value))}/mês comparando PF × Lucro Presumido.`;
     if (tabAtiva === 'carteira' && carteira.length) return `Tenho ${carteira.length} imóvel(is) cadastrados na carteira e quero a análise fina.`;
   } catch (e) {}
   return 'Usei o Planejador Tributário Imobiliário.';
@@ -1102,8 +963,7 @@ function updateLeadLink() {
 function abrirModal() {
   const msgs = {
     venda: 'Um contador confere as isenções e a melhor estrutura antes de você assinar a venda.',
-    aluguel: 'Um contador desenha a holding e mostra em quanto tempo ela se paga com seus aluguéis.',
-    holding: 'Estruturação de holding é análise caso a caso: ITCMD, ITBI e usufruto. Agende a análise do seu patrimônio.',
+    aluguel: 'Um contador mostra em quanto tempo o Lucro Presumido se paga com seus aluguéis.',
     carteira: 'Envie sua carteira e receba a análise fina: estrutura ótima imóvel a imóvel, com custos rateados.',
   };
   $('modalLead').textContent = msgs[tabAtiva] || msgs.venda;
@@ -1155,12 +1015,8 @@ document.addEventListener('click', e => {
   // D — aluguel 10k/mês
   const Dpf = aluguelPF(10000, 0), Dpj = aluguelPJ(10000, 400);
   ok('D: carnê-leão', Dpf.ir, 1841.27, 0.1);
-  ok('D: holding presumido (s/ contab.)', Dpj.imposto, 1133, 0.1);
+  ok('D: lucro presumido (s/ contab.)', Dpj.imposto, 1133, 0.1);
   ok('D: economia c/ contab.', Dpf.ir - Dpj.total, 308.27, 0.5);
-  // E — sucessão 3M
-  const E = sucessao({ patrimonio: 3000000, itcmdInv: .08, hon: .06, custas: .02, itcmdDoa: .08, itbiPct: 0, constituicao: 8000, contabAno: 4800 });
-  ok('E: inventário', E.inventario, 480000, 0.1);
-  ok('E: holding', E.holding, 252800, 0.1);
   // 7.713/88: aquisição 1980 → 45% de redução
   ok('7.713/88 ano 1980 (fator 0,55)', fator7713(1980), 0.55, 0);
   // Regressão (rev. adversarial): aquisição nov/2005 → FR2 conta de dez/2005 (m2=246 p/ venda jun/2026)
@@ -1169,7 +1025,7 @@ document.addEventListener('click', e => {
   ok('Fronteira out/2005: m1', fatoresReducao(2005, 10, 2026, 6).m1, 1, 0);
 })();
 
-renderVenda(); renderAluguel(); renderHolding(); renderCarteira();
+renderVenda(); renderAluguel(); renderCarteira();
 const fin = $('cFinalidade'); if (fin.value === 'alugar') $('cAluguelWrap').style.display = 'block';
 </script>
 </body>
